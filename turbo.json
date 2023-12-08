@@ -3,6 +3,7 @@
   "globalEnv": [
     "NEXT_PUBLIC_API_BASE_URL",
     "NEXT_PUBLIC_DEPLOY_URL",
+    "MAX_FILE_SIZE",
     "API_BASE_URL",
     "NEXT_PUBLIC_SENTRY_DSN",
     "SENTRY_AUTH_TOKEN",

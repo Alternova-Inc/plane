@@ -15,7 +15,10 @@ import { IIssueAttachment } from "types";
 // fetch-keys
 import { ISSUE_ATTACHMENTS, PROJECT_ISSUES_ACTIVITY } from "constants/fetch-keys";
 
-const maxFileSize = 5 * 1024 * 1024; // 5 MB
+const MAX_FILE_SIZE = process.env.MAX_FILE_SIZE;
+
+
+const maxFileSize: number = Number(MAX_FILE_SIZE);
 
 type Props = {
   disabled?: boolean;
