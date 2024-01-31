@@ -18,7 +18,7 @@ import { ISSUE_DISPLAY_FILTERS_BY_LAYOUT } from "constants/issue";
 import { EFilterType } from "store/issues/types";
 import { EProjectStore } from "store/command-palette.store";
 import { EUserWorkspaceRoles } from "constants/workspace";
-import UpdateToggle from "components/issues/issue-layouts/filters/header/edit-toggle";
+import { ViewEditToggle } from "components/issues/issue-layouts/filters/header/edit-toggle";
 
 export const ProjectViewIssuesHeader: React.FC = observer(() => {
   const router = useRouter();
@@ -156,7 +156,7 @@ export const ProjectViewIssuesHeader: React.FC = observer(() => {
           onChange={(layout) => handleLayoutChange(layout)}
           selectedLayout={activeLayout}
         />
-        <UpdateToggle />
+        <ViewEditToggle />
         <FiltersDropdown title="Filters" placement="bottom-end" disabled={!canUserCreateIssue}>
           <FilterSelection
             filters={issueFilters?.filters ?? {}}

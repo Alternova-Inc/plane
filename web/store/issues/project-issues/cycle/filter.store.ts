@@ -27,6 +27,7 @@ export interface ICycleIssuesFilterStore {
   // observable
   loader: boolean;
   filters: { [cycleId: string]: ICycleIssuesFilterOptions } | undefined;
+  isEditing: boolean;
   // computed
   issueFilters: IProjectIssuesFilters | undefined;
   appliedFilters: TIssueParams[] | undefined;
@@ -48,12 +49,14 @@ export interface ICycleIssuesFilterStore {
     filters: IIssueFilterOptions | IIssueDisplayFilterOptions | IIssueDisplayProperties,
     cycleId?: string | undefined
   ) => Promise<void>;
+  updateEditing: (newValue: boolean) => void;
 }
 
 export class CycleIssuesFilterStore extends IssueFilterBaseStore implements ICycleIssuesFilterStore {
   // observables
   loader: boolean = false;
   filters: { [projectId: string]: ICycleIssuesFilterOptions } | undefined = undefined;
+  isEditing: boolean = false;
   // root store
   rootStore;
   // services
@@ -69,6 +72,7 @@ export class CycleIssuesFilterStore extends IssueFilterBaseStore implements ICyc
       // observables
       loader: observable.ref,
       filters: observable.ref,
+      isEditing: observable,
       // computed
       issueFilters: computed,
       appliedFilters: computed,
@@ -77,6 +81,7 @@ export class CycleIssuesFilterStore extends IssueFilterBaseStore implements ICyc
       updateCycleFilters: action,
       fetchFilters: action,
       updateFilters: action,
+      updateEditing: action,
     });
 
     this.rootStore = _rootStore;
@@ -197,9 +202,10 @@ export class CycleIssuesFilterStore extends IssueFilterBaseStore implements ICyc
         this.filters = _cycleIssueFilters;
       });
 
-      await this.cycleService.patchCycle(workspaceSlug, projectId, cycleId, {
-        view_props: { filters: _filters.filters },
-      });
+      if (this.isEditing)
+        await this.cycleService.patchCycle(workspaceSlug, projectId, cycleId, {
+          view_props: { filters: _filters.filters },
+        });
 
       return _filters;
     } catch (error) {
@@ -207,6 +213,14 @@ export class CycleIssuesFilterStore extends IssueFilterBaseStore implements ICyc
       throw error;
     }
   };
+
+  updateEditing = (newValue: boolean) => {
+    if (newValue === undefined) {
+      this.isEditing = !this.isEditing;
+    } else {
+      this.isEditing = newValue;
+    }
+  }
 
   fetchFilters = async (workspaceSlug: string, projectId: string, cycleId: string) => {
     try {
