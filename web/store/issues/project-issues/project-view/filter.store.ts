@@ -27,6 +27,7 @@ export interface IViewIssuesFilterStore {
   // observable
   loader: boolean;
   filters: { [view_id: string]: IViewIssuesFilterOptions } | undefined;
+  isEditing: boolean;
   // computed
   issueFilters: IProjectIssuesFilters | undefined;
   appliedFilters: TIssueParams[] | undefined;
@@ -48,12 +49,14 @@ export interface IViewIssuesFilterStore {
     filters: IIssueFilterOptions | IIssueDisplayFilterOptions | IIssueDisplayProperties,
     viewId?: string | undefined
   ) => Promise<void>;
+  updateEditing: (value?: boolean) => void;
 }
 
 export class ViewIssuesFilterStore extends IssueFilterBaseStore implements IViewIssuesFilterStore {
   // observables
   loader: boolean = false;
   filters: { [projectId: string]: IViewIssuesFilterOptions } | undefined = undefined;
+  isEditing: boolean = false;
   // root store
   rootStore;
   // services
@@ -69,6 +72,7 @@ export class ViewIssuesFilterStore extends IssueFilterBaseStore implements IView
       // observables
       loader: observable.ref,
       filters: observable.ref,
+      isEditing: observable,
       // computed
       issueFilters: computed,
       appliedFilters: computed,
@@ -77,6 +81,7 @@ export class ViewIssuesFilterStore extends IssueFilterBaseStore implements IView
       updateViewFilters: action,
       fetchFilters: action,
       updateFilters: action,
+      updateEditing: action,
     });
 
     this.rootStore = _rootStore;
@@ -86,6 +91,7 @@ export class ViewIssuesFilterStore extends IssueFilterBaseStore implements IView
     this.issueService = new IssueService();
     this.viewService = new ViewService();
   }
+
 
   get issueFilters() {
     const projectId = this.rootStore.project.projectId;
@@ -198,9 +204,12 @@ export class ViewIssuesFilterStore extends IssueFilterBaseStore implements IView
         this.filters = _moduleIssueFilters;
       });
 
-      await this.viewService.patchView(workspaceSlug, projectId, viewId, {
-        query_data: { ..._filters.filters },
-      });
+      if (this.isEditing)
+        await this.viewService.patchView(workspaceSlug, projectId, viewId, {
+          query_data: { ..._filters.filters },
+        });
+      else
+        console.log("not udpated");
 
       return _filters;
     } catch (error) {
@@ -208,6 +217,14 @@ export class ViewIssuesFilterStore extends IssueFilterBaseStore implements IView
       throw error;
     }
   };
+
+  updateEditing = (value?: boolean) => {
+    if (value === undefined) {
+      this.isEditing = !this.isEditing;
+    } else {
+      this.isEditing = value;
+    }
+  }
 
   fetchFilters = async (workspaceSlug: string, projectId: string, viewId: string) => {
     try {
