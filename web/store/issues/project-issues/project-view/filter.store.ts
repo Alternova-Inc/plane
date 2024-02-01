@@ -208,8 +208,6 @@ export class ViewIssuesFilterStore extends IssueFilterBaseStore implements IView
         await this.viewService.patchView(workspaceSlug, projectId, viewId, {
           query_data: { ..._filters.filters },
         });
-      else
-        console.log("not udpated");
 
       return _filters;
     } catch (error) {
