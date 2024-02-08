@@ -30,7 +30,7 @@ export const ProjectViewLayoutRoot: React.FC = observer(() => {
       await fetchFilters(workspaceSlug.toString(), projectId.toString(), viewId.toString());
       await fetchIssues(workspaceSlug.toString(), projectId.toString(), getIssues ? "mutation" : "init-loader");
     }
-  });
+  }, {revalidateOnFocus: false});
 
   const activeLayout = issueFilters?.displayFilters?.layout;
 
