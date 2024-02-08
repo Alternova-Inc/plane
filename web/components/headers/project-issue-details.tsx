@@ -12,6 +12,7 @@ import { IssueService } from "services/issue";
 // constants
 import { ISSUE_DETAILS } from "constants/fetch-keys";
 import { useMobxStore } from "lib/mobx/store-provider";
+import { ChevronLeft } from "lucide-react";
 
 // services
 const issueService = new IssueService();
@@ -31,10 +32,17 @@ export const ProjectIssueDetailsHeader: FC = observer(() => {
       : null
   );
 
+  const goBack = () => {
+    router.back();
+  }
+
   return (
     <div className="relative z-10 flex h-[3.75rem] w-full flex-shrink-0 flex-row items-center justify-between gap-x-2 gap-y-4 border-b border-custom-border-200 bg-custom-sidebar-background-100 p-4">
       <div className="flex w-full flex-grow items-center gap-2 overflow-ellipsis whitespace-nowrap">
-        <div>
+        <div className="flex items-stretch">
+          <button onClick={goBack} aria-label="go back" className="p-2">
+            <ChevronLeft className="text-[#525252]"/>
+          </button>
           <Breadcrumbs>
             <Breadcrumbs.BreadcrumbItem
               type="text"

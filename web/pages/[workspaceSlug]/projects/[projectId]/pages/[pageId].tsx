@@ -517,7 +517,7 @@ const PageDetailsPage: NextPageWithLayout = observer(() => {
               projectId={projectId as string}
               issueId={peekIssueId ? (peekIssueId as string) : ""}
               isArchived={false}
-              handleIssue={async (issueToUpdate, action) => {
+              handleIssue={async (issueToUpdate) => {
                 if (peekIssueId && typeof peekIssueId === "string") {
                   handleUpdateIssue(peekIssueId, issueToUpdate);
                 }
