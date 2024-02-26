@@ -1,5 +1,6 @@
 # Django imports
 from django.utils import timezone
+from django.conf import settings
 
 # Third Party imports
 from rest_framework import serializers
@@ -33,9 +34,23 @@ from plane.db.models import (
     State,
     Project,
 )
+from plane.utils.parse_html import parse_text_to_html, refresh_url_content
 
 
-class IssueFlatSerializer(BaseSerializer):
+class BaseIssueSerializerMixin:
+    """abstract class for refresh s3 link in description htlm images"""
+
+    def refresh_html_content(self, instance, html, html_field_name="description_html"):
+        if settings.AWS_S3_BUCKET_AUTH:
+            html = parse_text_to_html(html)
+            refreshed, html = refresh_url_content(html)
+
+            if refreshed:
+                setattr(instance, html_field_name, html)
+                instance.save()
+
+
+class IssueFlatSerializer(BaseSerializer, BaseIssueSerializerMixin):
     ## Contain only flat fields
 
     class Meta:
@@ -52,6 +67,10 @@ class IssueFlatSerializer(BaseSerializer):
             "sort_order",
             "is_draft",
         ]
+
+    def to_representation(self, instance):
+        self.refresh_html_content(instance, instance.description_html)
+        return super().to_representation(instance)
 
 
 class IssueProjectLiteSerializer(BaseSerializer):
@@ -496,7 +515,7 @@ class IssueVoteSerializer(BaseSerializer):
         read_only_fields = fields
 
 
-class IssueCommentSerializer(BaseSerializer):
+class IssueCommentSerializer(BaseSerializer, BaseIssueSerializerMixin):
     actor_detail = UserLiteSerializer(read_only=True, source="actor")
     issue_detail = IssueFlatSerializer(read_only=True, source="issue")
     project_detail = ProjectLiteSerializer(read_only=True, source="project")
@@ -521,6 +540,10 @@ class IssueCommentSerializer(BaseSerializer):
             "updated_at",
         ]
 
+    def to_representation(self, instance):
+        self.refresh_html_content(instance, instance.comment_html, "comment_html")
+        return super().to_representation(instance)
+
 
 class IssueStateFlatSerializer(BaseSerializer):
     state_detail = StateLiteSerializer(read_only=True, source="state")
@@ -538,10 +561,8 @@ class IssueStateFlatSerializer(BaseSerializer):
 
 
 # Issue Serializer with state details
-class IssueStateSerializer(DynamicBaseSerializer):
-    label_details = LabelLiteSerializer(
-        read_only=True, source="labels", many=True
-    )
+class IssueStateSerializer(DynamicBaseSerializer, BaseIssueSerializerMixin):
+    label_details = LabelLiteSerializer(read_only=True, source="labels", many=True)
     state_detail = StateLiteSerializer(read_only=True, source="state")
     project_detail = ProjectLiteSerializer(read_only=True, source="project")
     assignee_details = UserLiteSerializer(
@@ -555,8 +576,11 @@ class IssueStateSerializer(DynamicBaseSerializer):
         model = Issue
         fields = "__all__"
 
+    def to_representation(self, instance):
+        self.refresh_html_content(instance, instance.description_html)
+        return super().to_representation(instance)
 
-class IssueSerializer(DynamicBaseSerializer):
+class IssueSerializer(DynamicBaseSerializer, BaseIssueSerializerMixin):
     # ids
     project_id = serializers.PrimaryKeyRelatedField(read_only=True)
     state_id = serializers.PrimaryKeyRelatedField(read_only=True)
@@ -623,11 +647,13 @@ class IssueDetailSerializer(IssueSerializer):
     class Meta(IssueSerializer.Meta):
         fields = IssueSerializer.Meta.fields + ['description_html']
 
+    def to_representation(self, instance):
+        self.refresh_html_content(instance, instance.description_html)
+        return super().to_representation(instance)
 
-class IssueLiteSerializer(DynamicBaseSerializer):
-    workspace_detail = WorkspaceLiteSerializer(
-        read_only=True, source="workspace"
-    )
+
+class IssueLiteSerializer(DynamicBaseSerializer, BaseIssueSerializerMixin):
+    workspace_detail = WorkspaceLiteSerializer(read_only=True, source="workspace")
     project_detail = ProjectLiteSerializer(read_only=True, source="project")
     state_detail = StateLiteSerializer(read_only=True, source="state")
     label_details = LabelLiteSerializer(
@@ -658,8 +684,12 @@ class IssueLiteSerializer(DynamicBaseSerializer):
             "updated_at",
         ]
 
+    def to_representation(self, instance):
+        self.refresh_html_content(instance, instance.description_html)
+        return super().to_representation(instance)
 
-class IssuePublicSerializer(BaseSerializer):
+
+class IssuePublicSerializer(BaseSerializer, BaseIssueSerializerMixin):
     project_detail = ProjectLiteSerializer(read_only=True, source="project")
     state_detail = StateLiteSerializer(read_only=True, source="state")
     reactions = IssueReactionSerializer(
@@ -686,6 +716,9 @@ class IssuePublicSerializer(BaseSerializer):
         ]
         read_only_fields = fields
 
+    def to_representation(self, instance):
+        self.refresh_html_content(instance, instance.description_html)
+        return super().to_representation(instance)
 
 class IssueSubscriberSerializer(BaseSerializer):
     class Meta:
