@@ -7,14 +7,14 @@ import { ProfileAuthWrapper } from "layouts/user-profile-layout";
 // components
 import { UserProfileHeader } from "components/headers";
 // types
-import { NextPageWithLayout } from "types/app";
+import { NextPageWithLayout } from "lib/types";
 import { ProfileIssuesPage } from "components/profile/profile-issues";
 
 const ProfileCreatedIssuesPage: NextPageWithLayout = () => <ProfileIssuesPage type="created" />;
 
 ProfileCreatedIssuesPage.getLayout = function getLayout(page: ReactElement) {
   return (
-    <AppLayout header={<UserProfileHeader />}>
+    <AppLayout header={<UserProfileHeader type="Created" />}>
       <ProfileAuthWrapper showProfileIssuesFilter>{page}</ProfileAuthWrapper>
     </AppLayout>
   );

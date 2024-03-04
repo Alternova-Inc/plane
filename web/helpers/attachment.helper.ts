@@ -4,6 +4,16 @@ export const getFileExtension = (filename: string) => {
   }
   return filename.slice(((filename.lastIndexOf(".") - 1) >>> 0) + 2);
 };
+export const generateFileName = (fileName: string) => {
+  const date = new Date();
+  const timestamp = date.getTime();
+
+  const _fileName = getFileName(fileName);
+  const nameWithoutExtension = _fileName.length > 80 ? _fileName.substring(0, 80) : _fileName;
+  const extension = getFileExtension(fileName);
+
+  return `${nameWithoutExtension}-${timestamp}.${extension}`;
+};
 
 export const getFileName = (fileName: string) => {
   const dotIndex = fileName.lastIndexOf(".");

@@ -67,7 +67,9 @@ def create_zip_file(files):
 
 
 def upload_to_s3(zip_file, workspace_id, token_id, slug):
-    file_name = f"{workspace_id}/export-{slug}-{token_id[:6]}-{timezone.now()}.zip"
+    file_name = (
+        f"{workspace_id}/export-{slug}-{token_id[:6]}-{timezone.now()}.zip"
+    )
     expires_in = 7 * 24 * 60 * 60
     s3 = S3()
 
@@ -79,7 +81,60 @@ def upload_to_s3(zip_file, workspace_id, token_id, slug):
         "application/zip",
     )
 
+<<<<<<< HEAD
     presigned_url = s3.refresh_url(file_name, expires_in)
+=======
+    if settings.USE_MINIO:
+        s3 = boto3.client(
+            "s3",
+            endpoint_url=settings.AWS_S3_ENDPOINT_URL,
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            config=Config(signature_version="s3v4"),
+        )
+        s3.upload_fileobj(
+            zip_file,
+            settings.AWS_STORAGE_BUCKET_NAME,
+            file_name,
+            ExtraArgs={"ACL": "public-read", "ContentType": "application/zip"},
+        )
+        presigned_url = s3.generate_presigned_url(
+            "get_object",
+            Params={
+                "Bucket": settings.AWS_STORAGE_BUCKET_NAME,
+                "Key": file_name,
+            },
+            ExpiresIn=expires_in,
+        )
+        # Create the new url with updated domain and protocol
+        presigned_url = presigned_url.replace(
+            f"{settings.AWS_S3_ENDPOINT_URL}/{settings.AWS_STORAGE_BUCKET_NAME}/",
+            f"{settings.AWS_S3_URL_PROTOCOL}//{settings.AWS_S3_CUSTOM_DOMAIN}/",
+        )
+    else:
+        s3 = boto3.client(
+            "s3",
+            region_name=settings.AWS_REGION,
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            config=Config(signature_version="s3v4"),
+        )
+        s3.upload_fileobj(
+            zip_file,
+            settings.AWS_STORAGE_BUCKET_NAME,
+            file_name,
+            ExtraArgs={"ACL": "public-read", "ContentType": "application/zip"},
+        )
+
+        presigned_url = s3.generate_presigned_url(
+            "get_object",
+            Params={
+                "Bucket": settings.AWS_STORAGE_BUCKET_NAME,
+                "Key": file_name,
+            },
+            ExpiresIn=expires_in,
+        )
+>>>>>>> master
 
     exporter_instance = ExporterHistory.objects.get(token=token_id)
 
@@ -137,11 +192,17 @@ def generate_json_row(issue):
         else "",
         "Labels": issue["labels__name"],
         "Cycle Name": issue["issue_cycle__cycle__name"],
-        "Cycle Start Date": dateConverter(issue["issue_cycle__cycle__start_date"]),
+        "Cycle Start Date": dateConverter(
+            issue["issue_cycle__cycle__start_date"]
+        ),
         "Cycle End Date": dateConverter(issue["issue_cycle__cycle__end_date"]),
         "Module Name": issue["issue_module__module__name"],
-        "Module Start Date": dateConverter(issue["issue_module__module__start_date"]),
-        "Module Target Date": dateConverter(issue["issue_module__module__target_date"]),
+        "Module Start Date": dateConverter(
+            issue["issue_module__module__start_date"]
+        ),
+        "Module Target Date": dateConverter(
+            issue["issue_module__module__target_date"]
+        ),
         "Created At": dateTimeConverter(issue["created_at"]),
         "Updated At": dateTimeConverter(issue["updated_at"]),
         "Completed At": dateTimeConverter(issue["completed_at"]),
@@ -176,7 +237,11 @@ def update_json_row(rows, row):
 
 def update_table_row(rows, row):
     matched_index = next(
-        (index for index, existing_row in enumerate(rows) if existing_row[0] == row[0]),
+        (
+            index
+            for index, existing_row in enumerate(rows)
+            if existing_row[0] == row[0]
+        ),
         None,
     )
 
@@ -225,7 +290,9 @@ def generate_xlsx(header, project_id, issues, files):
 
 
 @shared_task
-def issue_export_task(provider, workspace_id, project_ids, token_id, multiple, slug):
+def issue_export_task(
+    provider, workspace_id, project_ids, token_id, multiple, slug
+):
     try:
         exporter_instance = ExporterHistory.objects.get(token=token_id)
         exporter_instance.status = "processing"
@@ -238,9 +305,14 @@ def issue_export_task(provider, workspace_id, project_ids, token_id, multiple, s
                     project_id__in=project_ids,
                     project__project_projectmember__member=exporter_instance.initiated_by_id,
                 )
-                .select_related("project", "workspace", "state", "parent", "created_by")
+                .select_related(
+                    "project", "workspace", "state", "parent", "created_by"
+                )
                 .prefetch_related(
-                    "assignees", "labels", "issue_cycle__cycle", "issue_module__module"
+                    "assignees",
+                    "labels",
+                    "issue_cycle__cycle",
+                    "issue_module__module",
                 )
                 .values(
                     "id",

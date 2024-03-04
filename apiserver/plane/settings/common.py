@@ -71,13 +71,19 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
-    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",
+    ),
     "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
-    "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
+    "DEFAULT_FILTER_BACKENDS": (
+        "django_filters.rest_framework.DjangoFilterBackend",
+    ),
 }
 
 # Django Auth Backend
-AUTHENTICATION_BACKENDS = ("django.contrib.auth.backends.ModelBackend",)  # default
+AUTHENTICATION_BACKENDS = (
+    "django.contrib.auth.backends.ModelBackend",
+)  # default
 
 # Root Urls
 ROOT_URLCONF = "plane.urls"
@@ -226,6 +232,7 @@ STORAGES["default"] = {
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID", "access-key")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY", "secret-key")
 AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_S3_BUCKET_NAME", "uploads")
+<<<<<<< HEAD
 AWS_REGION = os.environ.get("AWS_REGION")
 AWS_S3_REGION_NAME = os.environ.get("AWS_REGION")
 AWS_S3_SIGNATURE_VERSION = "s3v4"
@@ -238,6 +245,15 @@ AWS_S3_ENDPOINT_URL = os.environ.get("AWS_S3_ENDPOINT_URL", None) or os.environ.
     "MINIO_ENDPOINT_URL", None
 )
 
+=======
+AWS_REGION = os.environ.get("AWS_REGION", "")
+AWS_DEFAULT_ACL = "public-read"
+AWS_QUERYSTRING_AUTH = False
+AWS_S3_FILE_OVERWRITE = False
+AWS_S3_ENDPOINT_URL = os.environ.get(
+    "AWS_S3_ENDPOINT_URL", None
+) or os.environ.get("MINIO_ENDPOINT_URL", None)
+>>>>>>> master
 if AWS_S3_ENDPOINT_URL:
     parsed_url = urlparse(os.environ.get("WEB_URL", "http://localhost"))
     AWS_S3_CUSTOM_DOMAIN = f"{parsed_url.netloc}/{AWS_STORAGE_BUCKET_NAME}"
@@ -280,19 +296,16 @@ CELERY_ACCEPT_CONTENT = ["application/json"]
 
 if REDIS_SSL:
     redis_url = os.environ.get("REDIS_URL")
-    broker_url = (
-        f"{redis_url}?ssl_cert_reqs={ssl.CERT_NONE.name}&ssl_ca_certs={certifi.where()}"
-    )
+    broker_url = f"{redis_url}?ssl_cert_reqs={ssl.CERT_NONE.name}&ssl_ca_certs={certifi.where()}"
     CELERY_BROKER_URL = broker_url
-    CELERY_RESULT_BACKEND = broker_url
 else:
     CELERY_BROKER_URL = REDIS_URL
-    CELERY_RESULT_BACKEND = REDIS_URL
 
 CELERY_IMPORTS = (
     "plane.bgtasks.issue_automation_task",
     "plane.bgtasks.exporter_expired_task",
     "plane.bgtasks.file_asset_task",
+    "plane.bgtasks.email_notification_task",
 )
 
 # Sentry Settings
@@ -316,7 +329,7 @@ if bool(os.environ.get("SENTRY_DSN", False)) and os.environ.get(
 
 # Application Envs
 PROXY_BASE_URL = os.environ.get("PROXY_BASE_URL", False)  # For External
-SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN", False)
+
 FILE_SIZE_LIMIT = int(os.environ.get("FILE_SIZE_LIMIT", 5242880))
 
 # Unsplash Access key
@@ -337,7 +350,8 @@ POSTHOG_HOST = os.environ.get("POSTHOG_HOST", False)
 
 # instance key
 INSTANCE_KEY = os.environ.get(
-    "INSTANCE_KEY", "ae6517d563dfc13d8270bd45cf17b08f70b37d989128a9dab46ff687603333c3"
+    "INSTANCE_KEY",
+    "ae6517d563dfc13d8270bd45cf17b08f70b37d989128a9dab46ff687603333c3",
 )
 
 # Skip environment variable configuration

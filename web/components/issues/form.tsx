@@ -10,18 +10,9 @@ import { FileService } from "services/file.service";
 // hooks
 import useToast from "hooks/use-toast";
 // components
-import { GptAssistantModal } from "components/core";
 import { ParentIssuesListModal } from "components/issues";
 import {
-  IssueAssigneeSelect,
-  IssueDateSelect,
-  IssueEstimateSelect,
   IssueLabelSelect,
-  IssuePrioritySelect,
-  IssueProjectSelect,
-  IssueStateSelect,
-  IssueModuleSelect,
-  IssueCycleSelect,
 } from "components/issues/select";
 import { CreateStateModal } from "components/states";
 import { CreateLabelModal } from "components/labels";
@@ -30,7 +21,7 @@ import { Button, CustomMenu, Input, ToggleSwitch } from "@plane/ui";
 // icons
 import { LayoutPanelTop, Sparkle, X } from "lucide-react";
 // types
-import type { IIssue, ISearchIssueResponse } from "types";
+import { IIssue, ISearchIssueResponse } from "types/issue";
 // components
 import { RichTextEditorWithRef } from "@plane/rich-text-editor";
 import useEditorSuggestions from "hooks/use-editor-suggestions";

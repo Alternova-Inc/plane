@@ -68,7 +68,13 @@ class IssueSerializer(BaseSerializer):
             and data.get("target_date", None) is not None
             and data.get("start_date", None) > data.get("target_date", None)
         ):
+<<<<<<< HEAD
             raise serializers.ValidationError("Start date cannot exceed target date")
+=======
+            raise serializers.ValidationError(
+                "Start date cannot exceed target date"
+            )
+>>>>>>> master
 
         try:
             if data.get("description_html", None) is not None:
@@ -98,7 +104,8 @@ class IssueSerializer(BaseSerializer):
         if (
             data.get("state")
             and not State.objects.filter(
-                project_id=self.context.get("project_id"), pk=data.get("state").id
+                project_id=self.context.get("project_id"),
+                pk=data.get("state").id,
             ).exists()
         ):
             raise serializers.ValidationError(
@@ -109,7 +116,8 @@ class IssueSerializer(BaseSerializer):
         if (
             data.get("parent")
             and not Issue.objects.filter(
-                workspace_id=self.context.get("workspace_id"), pk=data.get("parent").id
+                workspace_id=self.context.get("workspace_id"),
+                pk=data.get("parent").id,
             ).exists()
         ):
             raise serializers.ValidationError(
@@ -240,9 +248,13 @@ class IssueSerializer(BaseSerializer):
                 ]
         if "labels" in self.fields:
             if "labels" in self.expand:
-                data["labels"] = LabelSerializer(instance.labels.all(), many=True).data
+                data["labels"] = LabelSerializer(
+                    instance.labels.all(), many=True
+                ).data
             else:
-                data["labels"] = [str(label.id) for label in instance.labels.all()]
+                data["labels"] = [
+                    str(label.id) for label in instance.labels.all()
+                ]
 
         return data
 
@@ -280,7 +292,8 @@ class IssueLinkSerializer(BaseSerializer):
     # Validation if url already exists
     def create(self, validated_data):
         if IssueLink.objects.filter(
-            url=validated_data.get("url"), issue_id=validated_data.get("issue_id")
+            url=validated_data.get("url"),
+            issue_id=validated_data.get("issue_id"),
         ).exists():
             raise serializers.ValidationError(
                 {"error": "URL already exists for this Issue"}
