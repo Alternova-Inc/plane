@@ -358,6 +358,20 @@ const PageDetailsPage: NextPageWithLayout = observer(() => {
                 />
               </div>
             )}
+<<<<<<< HEAD
+=======
+            <IssuePeekOverview
+              workspaceSlug={workspaceSlug as string}
+              projectId={projectId as string}
+              issueId={peekIssueId ? (peekIssueId as string) : ""}
+              isArchived={false}
+              handleIssue={async (issueToUpdate) => {
+                if (peekIssueId && typeof peekIssueId === "string") {
+                  handleUpdateIssue(peekIssueId, issueToUpdate);
+                }
+              }}
+            />
+>>>>>>> master-alt
           </div>
         )}
         <IssuePeekOverview />

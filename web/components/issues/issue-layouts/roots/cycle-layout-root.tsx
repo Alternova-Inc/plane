@@ -47,7 +47,7 @@ export const CycleLayoutRoot: React.FC = observer(() => {
         );
       }
     }
-  );
+    , {revalidateOnFocus:false});
 
   const activeLayout = issuesFilter?.issueFilters?.displayFilters?.layout;
 

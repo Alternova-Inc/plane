@@ -34,6 +34,8 @@ import { EIssueFilterType, EIssuesStoreType, ISSUE_DISPLAY_FILTERS_BY_LAYOUT } f
 import { EUserProjectRoles } from "constants/project";
 import { cn } from "helpers/common.helper";
 import { CycleMobileHeader } from "components/cycles/cycle-mobile-header";
+import { ISSUE_DISPLAY_FILTERS_BY_LAYOUT } from "constants/issue";
+import { CycleEditToggle } from "components/issues/issue-layouts/filters/header/edit-toggle";
 
 const CycleDropdownOption: React.FC<{ cycleId: string }> = ({ cycleId }) => {
   // router
@@ -218,6 +220,7 @@ export const CycleIssuesHeader: React.FC = observer(() => {
               onChange={(layout) => handleLayoutChange(layout)}
               selectedLayout={activeLayout}
             />
+            <CycleEditToggle />
             <FiltersDropdown title="Filters" placement="bottom-end">
               <FilterSelection
                 filters={issueFilters?.filters ?? {}}

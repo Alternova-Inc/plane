@@ -9,7 +9,12 @@ export const generateFileName = (fileName: string) => {
   return `${nameWithoutExtension}-${timestamp}.${extension}`;
 };
 
-export const getFileExtension = (filename: string) => filename.slice(((filename.lastIndexOf(".") - 1) >>> 0) + 2);
+export const getFileExtension = (filename: string) => {
+  if (filename.lastIndexOf("?") !== -1) {
+    filename = filename.slice(0, filename.lastIndexOf("?"));
+  }
+  return filename.slice(((filename.lastIndexOf(".") - 1) >>> 0) + 2);
+};
 
 export const getFileName = (fileName: string) => {
   const dotIndex = fileName.lastIndexOf(".");
