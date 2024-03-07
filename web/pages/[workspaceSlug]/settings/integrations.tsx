@@ -2,8 +2,8 @@ import { ReactElement } from "react";
 import { useRouter } from "next/router";
 import { observer } from "mobx-react-lite";
 import useSWR from "swr";
-// mobx store
-import { useMobxStore } from "lib/mobx/store-provider";
+// hooks
+import { useUser } from "hooks/store";
 // services
 import { IntegrationService } from "services/integrations";
 // layouts
@@ -13,10 +13,9 @@ import { WorkspaceSettingLayout } from "layouts/settings-layout";
 import { SingleIntegrationCard } from "components/integration";
 import { WorkspaceSettingHeader } from "components/headers";
 // ui
-import { IntegrationAndImportExportBanner } from "components/ui";
-import { Loader } from "@plane/ui";
+import { IntegrationAndImportExportBanner, IntegrationsSettingsLoader } from "components/ui";
 // types
-import { NextPageWithLayout } from "types/app";
+import { NextPageWithLayout } from "lib/types";
 // fetch-keys
 import { APP_INTEGRATIONS } from "constants/fetch-keys";
 // constants
@@ -28,10 +27,10 @@ const WorkspaceIntegrationsPage: NextPageWithLayout = observer(() => {
   // router
   const router = useRouter();
   const { workspaceSlug } = router.query;
-  // mobx store
+  // store hooks
   const {
-    user: { currentWorkspaceRole },
-  } = useMobxStore();
+    membership: { currentWorkspaceRole },
+  } = useUser();
 
   const isAdmin = currentWorkspaceRole === EUserWorkspaceRoles.ADMIN;
 
@@ -53,10 +52,7 @@ const WorkspaceIntegrationsPage: NextPageWithLayout = observer(() => {
         {appIntegrations ? (
           appIntegrations.map((integration) => <SingleIntegrationCard key={integration.id} integration={integration} />)
         ) : (
-          <Loader className="mt-4 space-y-2.5">
-            <Loader.Item height="89px" />
-            <Loader.Item height="89px" />
-          </Loader>
+          <IntegrationsSettingsLoader />
         )}
       </div>
     </section>
@@ -65,7 +61,7 @@ const WorkspaceIntegrationsPage: NextPageWithLayout = observer(() => {
 
 WorkspaceIntegrationsPage.getLayout = function getLayout(page: ReactElement) {
   return (
-    <AppLayout header={<WorkspaceSettingHeader title="Export Settings" />}>
+    <AppLayout header={<WorkspaceSettingHeader title="Integrations Settings" />}>
       <WorkspaceSettingLayout>{page}</WorkspaceSettingLayout>
     </AppLayout>
   );

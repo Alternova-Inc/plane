@@ -2,16 +2,41 @@
 import { Calendar, GanttChartSquare, Kanban, List, Sheet } from "lucide-react";
 // types
 import {
-  IIssueDisplayProperties,
   IIssueFilterOptions,
+  IIssueDisplayProperties,
   TIssueExtraOptions,
   TIssueGroupByOptions,
   TIssueLayouts,
   TIssueOrderByOptions,
   TIssuePriorities,
   TIssueTypeFilters,
-  TStateGroups,
-} from "types";
+} from "@plane/types";
+
+export enum EIssuesStoreType {
+  GLOBAL = "GLOBAL",
+  PROFILE = "PROFILE",
+  PROJECT = "PROJECT",
+  CYCLE = "CYCLE",
+  MODULE = "MODULE",
+  PROJECT_VIEW = "PROJECT_VIEW",
+  ARCHIVED = "ARCHIVED",
+  DRAFT = "DRAFT",
+  DEFAULT = "DEFAULT",
+}
+
+export type TCreateModalStoreTypes =
+  | EIssuesStoreType.PROJECT
+  | EIssuesStoreType.PROJECT_VIEW
+  | EIssuesStoreType.PROFILE
+  | EIssuesStoreType.CYCLE
+  | EIssuesStoreType.MODULE;
+
+export enum EIssueFilterType {
+  FILTERS = "filters",
+  DISPLAY_FILTERS = "display_filters",
+  DISPLAY_PROPERTIES = "display_properties",
+  KANBAN_FILTERS = "kanban_filters",
+}
 
 export const ISSUE_PRIORITIES: {
   key: TIssuePriorities;
@@ -23,21 +48,6 @@ export const ISSUE_PRIORITIES: {
   { key: "low", title: "Low" },
   { key: "none", title: "None" },
 ];
-
-export const issuePriorityByKey = (key: string) => ISSUE_PRIORITIES.find((item) => item.key === key) || null;
-
-export const ISSUE_STATE_GROUPS: {
-  key: TStateGroups;
-  title: string;
-}[] = [
-  { key: "backlog", title: "Backlog" },
-  { key: "unstarted", title: "Unstarted" },
-  { key: "started", title: "Started" },
-  { key: "completed", title: "Completed" },
-  { key: "cancelled", title: "Cancelled" },
-];
-
-export const issueStateGroupByKey = (key: string) => ISSUE_STATE_GROUPS.find((item) => item.key === key) || null;
 
 export const ISSUE_START_DATE_OPTIONS = [
   { key: "last_week", title: "Last Week" },
@@ -294,7 +304,38 @@ export const ISSUE_DISPLAY_FILTERS_BY_LAYOUT: {
   },
   my_issues: {
     spreadsheet: {
-      filters: ["priority", "state_group", "labels", "assignees", "created_by", "project", "start_date", "target_date"],
+      filters: [
+        "priority",
+        "state_group",
+        "labels",
+        "assignees",
+        "created_by",
+        "subscriber",
+        "project",
+        "start_date",
+        "target_date",
+      ],
+      display_properties: true,
+      display_filters: {
+        type: [null, "active", "backlog"],
+      },
+      extra_options: {
+        access: false,
+        values: [],
+      },
+    },
+    list: {
+      filters: [
+        "priority",
+        "state_group",
+        "labels",
+        "assignees",
+        "created_by",
+        "subscriber",
+        "project",
+        "start_date",
+        "target_date",
+      ],
       display_properties: true,
       display_filters: {
         type: [null, "active", "backlog"],
@@ -370,6 +411,13 @@ export const ISSUE_DISPLAY_FILTERS_BY_LAYOUT: {
     },
   },
 };
+
+export enum EIssueListRow {
+  HEADER = "HEADER",
+  ISSUE = "ISSUE",
+  NO_ISSUES = "NO_ISSUES",
+  QUICK_ADD = "QUICK_ADD",
+}
 
 export const getValueFromObject = (object: Object, key: string): string | number | boolean | null => {
   const keys = key ? key.split(".") : [];

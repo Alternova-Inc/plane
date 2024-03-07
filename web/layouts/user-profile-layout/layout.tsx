@@ -1,7 +1,7 @@
-import { observer } from "mobx-react-lite";
 import { useRouter } from "next/router";
-// mobx store
-import { useMobxStore } from "lib/mobx/store-provider";
+import { observer } from "mobx-react-lite";
+// hooks
+import { useUser } from "hooks/store";
 // components
 import { ProfileNavbar, ProfileSidebar } from "components/profile";
 
@@ -18,8 +18,8 @@ export const ProfileAuthWrapper: React.FC<Props> = observer((props) => {
   const router = useRouter();
 
   const {
-    user: { currentWorkspaceRole },
-  } = useMobxStore();
+    membership: { currentWorkspaceRole },
+  } = useUser();
 
   if (!currentWorkspaceRole) return null;
 
@@ -28,9 +28,8 @@ export const ProfileAuthWrapper: React.FC<Props> = observer((props) => {
   const isAuthorizedPath = router.pathname.includes("assigned" || "created" || "subscribed");
 
   return (
-    <div className="h-full w-full md:flex md:flex-row-reverse md:overflow-hidden">
-      <ProfileSidebar />
-      <div className="flex w-full flex-col md:h-full md:overflow-hidden">
+    <div className="h-full w-full realtive flex flex-row">
+      <div className="w-full realtive flex flex-col">
         <ProfileNavbar isAuthorized={isAuthorized} showProfileIssuesFilter={showProfileIssuesFilter} />
         {isAuthorized || !isAuthorizedPath ? (
           <div className={`w-full overflow-hidden md:h-full ${className}`}>{children}</div>
@@ -40,6 +39,8 @@ export const ProfileAuthWrapper: React.FC<Props> = observer((props) => {
           </div>
         )}
       </div>
+
+      <ProfileSidebar />
     </div>
   );
 });
