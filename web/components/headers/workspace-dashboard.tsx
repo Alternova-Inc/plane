@@ -55,8 +55,8 @@ export const WorkspaceDashboardHeader = () => {
                 element: "navbar",
               })
             }
-            className="flex flex-shrink-0 items-center gap-1.5 rounded bg-custom-background-80 px-3 py-1.5 text-xs font-medium"
-            href="https://github.com/Alternova-Inc/plane"
+            className="flex flex-shrink-0 items-center gap-1.5 rounded bg-custom-background-80 px-3 py-1.5"
+            href="https://github.com/makeplane/plane"
             target="_blank"
             rel="noopener noreferrer"
           >

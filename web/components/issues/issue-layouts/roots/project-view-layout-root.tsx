@@ -41,7 +41,9 @@ export const ProjectViewLayoutRoot: React.FC = observer(() => {
           viewId.toString()
         );
       }
-  }, {revalidateOnFocus: false});
+    },
+    { revalidateIfStale: false, revalidateOnFocus: false }
+  );
 
   const issueActions = useMemo(
     () => ({

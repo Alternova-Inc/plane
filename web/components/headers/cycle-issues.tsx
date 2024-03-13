@@ -34,8 +34,6 @@ import { EIssueFilterType, EIssuesStoreType, ISSUE_DISPLAY_FILTERS_BY_LAYOUT } f
 import { EUserProjectRoles } from "constants/project";
 import { cn } from "helpers/common.helper";
 import { CycleMobileHeader } from "components/cycles/cycle-mobile-header";
-import { ISSUE_DISPLAY_FILTERS_BY_LAYOUT } from "constants/issue";
-import { CycleEditToggle } from "components/issues/issue-layouts/filters/header/edit-toggle";
 
 const CycleDropdownOption: React.FC<{ cycleId: string }> = ({ cycleId }) => {
   // router
@@ -151,7 +149,7 @@ export const CycleIssuesHeader: React.FC = observer(() => {
         onClose={() => setAnalyticsModal(false)}
         cycleDetails={cycleDetails ?? undefined}
       />
-      <div className="relative z-10 w-full items-center gap-x-2 gap-y-4">
+      <div className="relative z-[15] w-full items-center gap-x-2 gap-y-4">
         <div className="flex justify-between border-b border-custom-border-200 bg-custom-sidebar-background-100 p-4">
           <div className="flex items-center gap-2">
             <SidebarHamburgerToggle />
@@ -177,7 +175,12 @@ export const CycleIssuesHeader: React.FC = observer(() => {
                         }
                       />
                     </span>
-                    <Link href={`/${workspaceSlug}/projects/${currentProjectDetails?.id}/issues`} className="block md:hidden pl-2 text-custom-text-300">...</Link>
+                    <Link
+                      href={`/${workspaceSlug}/projects/${currentProjectDetails?.id}/issues`}
+                      className="block md:hidden pl-2 text-custom-text-300"
+                    >
+                      ...
+                    </Link>
                   </span>
                 }
               />
@@ -220,7 +223,6 @@ export const CycleIssuesHeader: React.FC = observer(() => {
               onChange={(layout) => handleLayoutChange(layout)}
               selectedLayout={activeLayout}
             />
-            <CycleEditToggle />
             <FiltersDropdown title="Filters" placement="bottom-end">
               <FilterSelection
                 filters={issueFilters?.filters ?? {}}
@@ -242,6 +244,7 @@ export const CycleIssuesHeader: React.FC = observer(() => {
                 handleDisplayFiltersUpdate={handleDisplayFilters}
                 displayProperties={issueFilters?.displayProperties ?? {}}
                 handleDisplayPropertiesUpdate={handleDisplayProperties}
+                ignoreGroupedFilters={["cycle"]}
               />
             </FiltersDropdown>
 
@@ -285,5 +288,3 @@ export const CycleIssuesHeader: React.FC = observer(() => {
     </>
   );
 });
-
-
