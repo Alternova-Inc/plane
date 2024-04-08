@@ -709,8 +709,12 @@ class IssueSerializer(DynamicBaseSerializer, BaseIssueSerializerMixin):
         self.refresh_html_content(instance, instance.description_html)
         return super().to_representation(instance)
 
+    def to_representation(self, instance):
+        self.refresh_html_content(instance, instance.description_html)
+        return super().to_representation(instance)
 
 class IssueLiteSerializer(DynamicBaseSerializer):
+
     class Meta:
         model = Issue
         fields = [

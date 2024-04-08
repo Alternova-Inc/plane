@@ -245,6 +245,7 @@ AWS_S3_ENDPOINT_URL = os.environ.get("AWS_S3_ENDPOINT_URL", None) or os.environ.
     "MINIO_ENDPOINT_URL", None
 )
 
+
 if AWS_S3_ENDPOINT_URL:
     parsed_url = urlparse(os.environ.get("WEB_URL", "http://localhost"))
     AWS_S3_CUSTOM_DOMAIN = f"{parsed_url.netloc}/{AWS_STORAGE_BUCKET_NAME}"
