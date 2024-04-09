@@ -3,19 +3,20 @@
 # Python imports
 import os
 import ssl
-import certifi
 from datetime import timedelta
 from urllib.parse import urlparse
 
-# Django imports
-from django.core.management.utils import get_random_secret_key
+import certifi
 
 # Third party imports
 import dj_database_url
 import sentry_sdk
+
+# Django imports
+from django.core.management.utils import get_random_secret_key
+from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.redis import RedisIntegration
-from sentry_sdk.integrations.celery import CeleryIntegration
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -23,7 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.environ.get("SECRET_KEY", get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = int(os.environ.get("DEBUG", "0"))
 
 # Allowed Hosts
 ALLOWED_HOSTS = ["*"]
@@ -240,9 +241,10 @@ AWS_QUERYSTRING_AUTH = os.environ.get("AWS_QUERYSTRING_AUTH", False)
 AWS_DEFAULT_ACL = "private" if AWS_S3_BUCKET_AUTH else "public-read"
 AWS_S3_FILE_OVERWRITE = os.environ.get("AWS_S3_FILE_OVERWRITE", False)
 AWS_S3_MAX_AGE_SECONDS = 60 * 60
-AWS_S3_ENDPOINT_URL = os.environ.get(
-    "AWS_S3_ENDPOINT_URL", None
-) or os.environ.get("MINIO_ENDPOINT_URL", None)
+AWS_S3_ENDPOINT_URL = os.environ.get("AWS_S3_ENDPOINT_URL", None) or os.environ.get(
+    "MINIO_ENDPOINT_URL", None
+)
+
 
 if AWS_S3_ENDPOINT_URL:
     parsed_url = urlparse(os.environ.get("WEB_URL", "http://localhost"))

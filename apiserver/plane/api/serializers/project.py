@@ -2,7 +2,12 @@
 from rest_framework import serializers
 
 # Module imports
-from plane.db.models import Project, ProjectIdentifier, WorkspaceMember
+from plane.db.models import (
+    Project,
+    ProjectIdentifier,
+    WorkspaceMember,
+)
+
 from .base import BaseSerializer
 
 

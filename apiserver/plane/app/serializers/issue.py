@@ -1,5 +1,7 @@
 # Django imports
 from django.utils import timezone
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
 from django.conf import settings
 
 # Third Party imports
@@ -8,7 +10,7 @@ from rest_framework import serializers
 # Module imports
 from .base import BaseSerializer, DynamicBaseSerializer
 from .user import UserLiteSerializer
-from .state import StateSerializer, StateLiteSerializer
+from .state import StateLiteSerializer
 from .project import ProjectLiteSerializer
 from .workspace import WorkspaceLiteSerializer
 from plane.db.models import (
@@ -32,7 +34,6 @@ from plane.db.models import (
     IssueVote,
     IssueRelation,
     State,
-    Project,
 )
 from plane.utils.parse_html import parse_text_to_html, refresh_url_content
 
@@ -40,7 +41,9 @@ from plane.utils.parse_html import parse_text_to_html, refresh_url_content
 class BaseIssueSerializerMixin:
     """abstract class for refresh s3 link in description htlm images"""
 
-    def refresh_html_content(self, instance, html, html_field_name="description_html"):
+    def refresh_html_content(
+        self, instance, html, html_field_name="description_html"
+    ):
         if settings.AWS_S3_BUCKET_AUTH:
             html = parse_text_to_html(html)
             refreshed, html = refresh_url_content(html)
@@ -451,6 +454,20 @@ class IssueLinkSerializer(BaseSerializer):
             "issue",
         ]
 
+    def validate_url(self, value):
+        # Check URL format
+        validate_url = URLValidator()
+        try:
+            validate_url(value)
+        except ValidationError:
+            raise serializers.ValidationError("Invalid URL format.")
+
+        # Check URL scheme
+        if not value.startswith(("http://", "https://")):
+            raise serializers.ValidationError("Invalid URL scheme.")
+
+        return value
+
     # Validation if url already exists
     def create(self, validated_data):
         if IssueLink.objects.filter(
@@ -462,9 +479,19 @@ class IssueLinkSerializer(BaseSerializer):
             )
         return IssueLink.objects.create(**validated_data)
 
+    def update(self, instance, validated_data):
+        if IssueLink.objects.filter(
+            url=validated_data.get("url"),
+            issue_id=instance.issue_id,
+        ).exists():
+            raise serializers.ValidationError(
+                {"error": "URL already exists for this Issue"}
+            )
+
+        return super().update(instance, validated_data)
+
 
 class IssueLinkLiteSerializer(BaseSerializer):
-
     class Meta:
         model = IssueLink
         fields = [
@@ -495,7 +522,6 @@ class IssueAttachmentSerializer(BaseSerializer):
 
 
 class IssueAttachmentLiteSerializer(DynamicBaseSerializer):
-
     class Meta:
         model = IssueAttachment
         fields = [
@@ -524,13 +550,12 @@ class IssueReactionSerializer(BaseSerializer):
 
 
 class IssueReactionLiteSerializer(DynamicBaseSerializer):
-
     class Meta:
         model = IssueReaction
         fields = [
             "id",
-            "actor_id",
-            "issue_id",
+            "actor",
+            "issue",
             "reaction",
         ]
 
@@ -582,7 +607,9 @@ class IssueCommentSerializer(BaseSerializer, BaseIssueSerializerMixin):
         ]
 
     def to_representation(self, instance):
-        self.refresh_html_content(instance, instance.comment_html, "comment_html")
+        self.refresh_html_content(
+            instance, instance.comment_html, "comment_html"
+        )
         return super().to_representation(instance)
 
 
@@ -603,7 +630,9 @@ class IssueStateFlatSerializer(BaseSerializer):
 
 # Issue Serializer with state details
 class IssueStateSerializer(DynamicBaseSerializer, BaseIssueSerializerMixin):
-    label_details = LabelLiteSerializer(read_only=True, source="labels", many=True)
+    label_details = LabelLiteSerializer(
+        read_only=True, source="labels", many=True
+    )
     state_detail = StateLiteSerializer(read_only=True, source="state")
     project_detail = ProjectLiteSerializer(read_only=True, source="project")
     assignee_details = UserLiteSerializer(
@@ -621,19 +650,23 @@ class IssueStateSerializer(DynamicBaseSerializer, BaseIssueSerializerMixin):
         self.refresh_html_content(instance, instance.description_html)
         return super().to_representation(instance)
 
+
 class IssueSerializer(DynamicBaseSerializer, BaseIssueSerializerMixin):
     # ids
     cycle_id = serializers.PrimaryKeyRelatedField(read_only=True)
     module_ids = serializers.ListField(
-        child=serializers.UUIDField(), required=False,
+        child=serializers.UUIDField(),
+        required=False,
     )
 
     # Many to many
     label_ids = serializers.ListField(
-        child=serializers.UUIDField(), required=False,
+        child=serializers.UUIDField(),
+        required=False,
     )
     assignee_ids = serializers.ListField(
-        child=serializers.UUIDField(), required=False,
+        child=serializers.UUIDField(),
+        required=False,
     )
 
     # Count items
@@ -672,22 +705,15 @@ class IssueSerializer(DynamicBaseSerializer, BaseIssueSerializerMixin):
         ]
         read_only_fields = fields
 
-
-class IssueDetailSerializer(IssueSerializer):
-    description_html = serializers.CharField()
-    is_subscribed = serializers.BooleanField(read_only=True)
-
-    class Meta(IssueSerializer.Meta):
-        fields = IssueSerializer.Meta.fields + [
-            "description_html",
-            "is_subscribed",
-        ]
+    def to_representation(self, instance):
+        self.refresh_html_content(instance, instance.description_html)
+        return super().to_representation(instance)
 
     def to_representation(self, instance):
         self.refresh_html_content(instance, instance.description_html)
         return super().to_representation(instance)
 
-class IssueLiteSerializer(DynamicBaseSerializer, BaseIssueSerializerMixin):
+class IssueLiteSerializer(DynamicBaseSerializer):
 
     class Meta:
         model = Issue
@@ -745,6 +771,7 @@ class IssuePublicSerializer(BaseSerializer, BaseIssueSerializerMixin):
     def to_representation(self, instance):
         self.refresh_html_content(instance, instance.description_html)
         return super().to_representation(instance)
+
 
 class IssueSubscriberSerializer(BaseSerializer):
     class Meta:
