@@ -39,9 +39,7 @@ class BaseProjectSerializerMixin:
 
 
 class ProjectSerializer(BaseSerializer, BaseProjectSerializerMixin):
-    workspace_detail = WorkspaceLiteSerializer(
-        source="workspace", read_only=True
-    )
+    workspace_detail = WorkspaceLiteSerializer(source="workspace", read_only=True)
 
     class Meta:
         model = Project
@@ -144,7 +142,7 @@ class ProjectListSerializer(DynamicBaseSerializer, BaseProjectSerializerMixin):
     member_role = serializers.IntegerField(read_only=True)
     is_deployed = serializers.BooleanField(read_only=True)
     members = serializers.SerializerMethodField()
-
+    
     def get_members(self, obj):
         project_members = getattr(obj, "members_list", None)
         if project_members is not None:
