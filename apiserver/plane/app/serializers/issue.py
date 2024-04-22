@@ -41,7 +41,9 @@ from plane.utils.parse_html import parse_text_to_html, refresh_url_content
 class BaseIssueSerializerMixin:
     """abstract class for refresh s3 link in description htlm images"""
 
-    def refresh_html_content(self, instance, html, html_field_name="description_html"):
+    def refresh_html_content(
+        self, instance, html, html_field_name="description_html"
+    ):
         if settings.AWS_S3_BUCKET_AUTH:
             html = parse_text_to_html(html)
             refreshed, html = refresh_url_content(html)
@@ -461,7 +463,7 @@ class IssueLinkSerializer(BaseSerializer):
             raise serializers.ValidationError("Invalid URL format.")
 
         # Check URL scheme
-        if not value.startswith(('http://', 'https://')):
+        if not value.startswith(("http://", "https://")):
             raise serializers.ValidationError("Invalid URL scheme.")
 
         return value
@@ -605,7 +607,9 @@ class IssueCommentSerializer(BaseSerializer, BaseIssueSerializerMixin):
         ]
 
     def to_representation(self, instance):
-        self.refresh_html_content(instance, instance.comment_html, "comment_html")
+        self.refresh_html_content(
+            instance, instance.comment_html, "comment_html"
+        )
         return super().to_representation(instance)
 
 
@@ -626,7 +630,9 @@ class IssueStateFlatSerializer(BaseSerializer):
 
 # Issue Serializer with state details
 class IssueStateSerializer(DynamicBaseSerializer, BaseIssueSerializerMixin):
-    label_details = LabelLiteSerializer(read_only=True, source="labels", many=True)
+    label_details = LabelLiteSerializer(
+        read_only=True, source="labels", many=True
+    )
     state_detail = StateLiteSerializer(read_only=True, source="state")
     project_detail = ProjectLiteSerializer(read_only=True, source="project")
     assignee_details = UserLiteSerializer(
@@ -643,6 +649,7 @@ class IssueStateSerializer(DynamicBaseSerializer, BaseIssueSerializerMixin):
     def to_representation(self, instance):
         self.refresh_html_content(instance, instance.description_html)
         return super().to_representation(instance)
+
 
 class IssueInboxSerializer(DynamicBaseSerializer):
     label_ids = serializers.ListField(
@@ -722,6 +729,7 @@ class IssueSerializer(DynamicBaseSerializer, BaseIssueSerializerMixin):
         self.refresh_html_content(instance, instance.description_html)
         return super().to_representation(instance)
 
+
 class IssueLiteSerializer(DynamicBaseSerializer):
     class Meta:
         model = Issue
@@ -779,6 +787,7 @@ class IssuePublicSerializer(BaseSerializer, BaseIssueSerializerMixin):
     def to_representation(self, instance):
         self.refresh_html_content(instance, instance.description_html)
         return super().to_representation(instance)
+
 
 class IssueSubscriberSerializer(BaseSerializer):
     class Meta:
