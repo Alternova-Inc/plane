@@ -731,6 +731,7 @@ class IssueSerializer(DynamicBaseSerializer, BaseIssueSerializerMixin):
 
 
 class IssueLiteSerializer(DynamicBaseSerializer):
+
     class Meta:
         model = Issue
         fields = [

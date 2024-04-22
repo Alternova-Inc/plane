@@ -13,13 +13,12 @@ from celery import shared_task
 # Django imports
 from django.conf import settings
 from django.utils import timezone
-
-# Third party imports
-from celery import shared_task
 from openpyxl import Workbook
 
 # Module imports
-from plane.db.models import Issue, ExporterHistory
+from plane.db.models import ExporterHistory, Issue
+from plane.utils.exception_logger import log_exception
+
 from plane.utils.s3 import S3
 
 

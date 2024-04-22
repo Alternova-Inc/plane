@@ -30,7 +30,6 @@ from .state import StateLiteSerializer
 from .user import UserLiteSerializer
 
 
-
 class IssueSerializer(BaseSerializer):
     assignees = serializers.ListField(
         child=serializers.PrimaryKeyRelatedField(
