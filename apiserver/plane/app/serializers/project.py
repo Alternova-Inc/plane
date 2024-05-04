@@ -22,7 +22,6 @@ from plane.db.models import (
 )
 from plane.utils.s3 import S3
 
-
 class BaseProjectSerializerMixin:
     """abstract class for refresh cover image s3 link"""
 
@@ -39,7 +38,9 @@ class BaseProjectSerializerMixin:
 
 
 class ProjectSerializer(BaseSerializer, BaseProjectSerializerMixin):
-    workspace_detail = WorkspaceLiteSerializer(source="workspace", read_only=True)
+    workspace_detail = WorkspaceLiteSerializer(
+        source="workspace", read_only=True
+    )
 
     class Meta:
         model = Project
@@ -107,7 +108,7 @@ class ProjectSerializer(BaseSerializer, BaseProjectSerializerMixin):
         self.refresh_cover_image(instance)
         return super().to_representation(instance)
 
-
+      
 class ProjectLiteSerializer(BaseSerializer, BaseProjectSerializerMixin):
     class Meta:
         model = Project
@@ -166,7 +167,7 @@ class ProjectListSerializer(DynamicBaseSerializer, BaseProjectSerializerMixin):
         self.refresh_cover_image(instance)
         return super().to_representation(instance)
 
-
+      
 class ProjectDetailSerializer(BaseSerializer, BaseProjectSerializerMixin):
     # workspace = WorkSpaceSerializer(read_only=True)
     default_assignee = UserLiteSerializer(read_only=True)
