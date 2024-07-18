@@ -71,9 +71,7 @@ def create_zip_file(files):
 
 
 def upload_to_s3(zip_file, workspace_id, token_id, slug):
-    file_name = (
-        f"{workspace_id}/export-{slug}-{token_id[:6]}-{timezone.now()}.zip"
-    )
+    file_name = f"{workspace_id}/export-{slug}-{token_id[:6]}-{str(timezone.now().date())}.zip"
     expires_in = 7 * 24 * 60 * 60
     s3 = S3()
 
@@ -89,6 +87,7 @@ def upload_to_s3(zip_file, workspace_id, token_id, slug):
 
     exporter_instance = ExporterHistory.objects.get(token=token_id)
 
+    # Update the exporter instance with the presigned url
     if presigned_url:
         exporter_instance.url = presigned_url
         exporter_instance.status = "completed"
