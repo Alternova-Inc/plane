@@ -23,6 +23,7 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.response import Response
 
+from plane.utils.s3 import refresh_avatar_image
 from plane.app.permissions import (
     WorkspaceEntityPermission,
     WorkspaceViewerPermission,
@@ -359,7 +360,7 @@ class WorkspaceUserProfileEndpoint(BaseAPIView):
                     "email": user_data.email,
                     "first_name": user_data.first_name,
                     "last_name": user_data.last_name,
-                    "avatar": user_data.avatar,
+                    "avatar": refresh_avatar_image(user_data),
                     "cover_image": user_data.cover_image,
                     "date_joined": user_data.date_joined,
                     "user_timezone": user_data.user_timezone,

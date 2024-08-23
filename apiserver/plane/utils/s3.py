@@ -17,7 +17,9 @@ class S3:
                 endpoint_url=settings.AWS_S3_ENDPOINT_URL,
                 aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
                 aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-                config=Config(signature_version=settings.AWS_S3_SIGNATURE_VERSION),
+                config=Config(
+                    signature_version=settings.AWS_S3_SIGNATURE_VERSION
+                ),
             )
         else:
             self.client = boto3.client(
@@ -25,7 +27,9 @@ class S3:
                 region_name=settings.AWS_REGION,
                 aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
                 aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-                config=Config(signature_version=settings.AWS_S3_SIGNATURE_VERSION),
+                config=Config(
+                    signature_version=settings.AWS_S3_SIGNATURE_VERSION
+                ),
             )
 
     def refresh_url(self, old_url, time=settings.AWS_S3_MAX_AGE_SECONDS):
@@ -69,10 +73,22 @@ class S3:
         query_params = parse_qs(parsed_url.query)
         x_amz_date = query_params.get("X-Amz-Date", [None])[0]
 
-        x_amz_date_to_date = datetime.strptime(x_amz_date, date_format).replace(
-            tzinfo=timezone.utc
-        )
+        x_amz_date_to_date = datetime.strptime(
+            x_amz_date, date_format
+        ).replace(tzinfo=timezone.utc)
         actual_date = datetime.now(timezone.utc)
         seconds_difference = (actual_date - x_amz_date_to_date).total_seconds()
 
         return seconds_difference >= (settings.AWS_S3_MAX_AGE_SECONDS - 20)
+
+
+def refresh_avatar_image(instance):
+    if settings.AWS_S3_BUCKET_AUTH:
+        avatar = instance.avatar
+
+        if S3.verify_s3_url(avatar) and S3.url_file_has_expired(avatar):
+            s3 = S3()
+            instance.avatar = s3.refresh_url(avatar)
+            instance.save()
+
+    return instance.avatar
