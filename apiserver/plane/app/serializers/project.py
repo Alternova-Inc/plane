@@ -1,3 +1,6 @@
+# Django imports
+from django.conf import settings
+
 # Third party imports
 from rest_framework import serializers
 
@@ -16,9 +19,25 @@ from plane.db.models import (
     DeployBoard,
     ProjectPublicMember,
 )
+from plane.utils.s3 import S3, refresh_avatar_image
 
 
-class ProjectSerializer(BaseSerializer):
+class BaseProjectSerializerMixin:
+    """abstract class for refresh cover image s3 link"""
+
+    def refresh_cover_image(self, instance):
+        if settings.AWS_S3_BUCKET_AUTH:
+            cover_image = instance.cover_image
+
+            if S3.verify_s3_url(cover_image) and S3.url_file_has_expired(
+                cover_image
+            ):
+                s3 = S3()
+                instance.cover_image = s3.refresh_url(cover_image)
+                instance.save()
+
+
+class ProjectSerializer(BaseSerializer, BaseProjectSerializerMixin):
     workspace_detail = WorkspaceLiteSerializer(
         source="workspace", read_only=True
     )
@@ -86,8 +105,12 @@ class ProjectSerializer(BaseSerializer):
             detail="Project Identifier is already taken"
         )
 
+    def to_representation(self, instance):
+        self.refresh_cover_image(instance)
+        return super().to_representation(instance)
 
-class ProjectLiteSerializer(BaseSerializer):
+
+class ProjectLiteSerializer(BaseSerializer, BaseProjectSerializerMixin):
     class Meta:
         model = Project
         fields = [
@@ -100,8 +123,12 @@ class ProjectLiteSerializer(BaseSerializer):
         ]
         read_only_fields = fields
 
+    def to_representation(self, instance):
+        self.refresh_cover_image(instance)
+        return super().to_representation(instance)
 
-class ProjectListSerializer(DynamicBaseSerializer):
+
+class ProjectListSerializer(DynamicBaseSerializer, BaseProjectSerializerMixin):
     total_issues = serializers.IntegerField(read_only=True)
     archived_issues = serializers.IntegerField(read_only=True)
     archived_sub_issues = serializers.IntegerField(read_only=True)
@@ -127,7 +154,7 @@ class ProjectListSerializer(DynamicBaseSerializer):
                     "id": member.id,
                     "member_id": member.member_id,
                     "member__display_name": member.member.display_name,
-                    "member__avatar": member.member.avatar,
+                    "member__avatar": refresh_avatar_image(member.member),
                 }
                 for member in project_members
             ]
@@ -137,8 +164,12 @@ class ProjectListSerializer(DynamicBaseSerializer):
         model = Project
         fields = "__all__"
 
+    def to_representation(self, instance):
+        self.refresh_cover_image(instance)
+        return super().to_representation(instance)
 
-class ProjectDetailSerializer(BaseSerializer):
+
+class ProjectDetailSerializer(BaseSerializer, BaseProjectSerializerMixin):
     # workspace = WorkSpaceSerializer(read_only=True)
     default_assignee = UserLiteSerializer(read_only=True)
     project_lead = UserLiteSerializer(read_only=True)
@@ -154,6 +185,10 @@ class ProjectDetailSerializer(BaseSerializer):
     class Meta:
         model = Project
         fields = "__all__"
+
+    def to_representation(self, instance):
+        self.refresh_cover_image(instance)
+        return super().to_representation(instance)
 
 
 class ProjectMemberSerializer(BaseSerializer):
