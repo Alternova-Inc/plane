@@ -47,6 +47,7 @@ class ProjectSerializer(BaseSerializer, BaseProjectSerializerMixin):
         fields = "__all__"
         read_only_fields = [
             "workspace",
+            "deleted_at",
         ]
 
     def create(self, validated_data):

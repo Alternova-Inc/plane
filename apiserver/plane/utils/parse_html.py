@@ -11,7 +11,7 @@ def refresh_url_content(html):
     refreshed = False
 
     s3 = S3()
-    for img_tag in html.find_all("img"):
+    for img_tag in html.find_all("image-component"):
         old_src = img_tag["src"]
 
         if S3.verify_s3_url(old_src) and S3.url_file_has_expired(old_src):
