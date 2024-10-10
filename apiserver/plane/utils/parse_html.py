@@ -9,14 +9,14 @@ def parse_text_to_html(html, features="html.parser"):
 
 def refresh_url_content(html):
     refreshed = False
-
     s3 = S3()
-    for img_tag in html.find_all("image-component"):
-        old_src = img_tag["src"]
+    for img_tag in html.find_all(["image-component", "img"]):
+        old_src = img_tag.get("src", None)
 
-        if S3.verify_s3_url(old_src) and S3.url_file_has_expired(old_src):
-            new_url = s3.refresh_url(old_src)
-            img_tag["src"] = new_url
-            refreshed = True
+        if old_src:
+            if S3.verify_s3_url(old_src) and S3.url_file_has_expired(old_src):
+                new_url = s3.refresh_url(old_src)
+                img_tag["src"] = new_url
+                refreshed = True
 
     return refreshed, str(html)
