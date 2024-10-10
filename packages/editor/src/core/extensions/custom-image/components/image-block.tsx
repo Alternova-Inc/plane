@@ -57,12 +57,12 @@ export const CustomImageBlock: React.FC<CustomImageBlockProps> = (props) => {
     editorContainer,
     setEditorContainer,
   } = props;
-  const { src: remoteImageSrc, width, height, aspectRatio } = node.attrs;
+  const { src: remoteImageSrc, width: nodeWidth, height: nodeHeight, aspectRatio: nodeAspectRatio } = node.attrs;
   // states
   const [size, setSize] = useState<Size>({
-    width: ensurePixelString(width, "35%"),
-    height: ensurePixelString(height, "auto"),
-    aspectRatio: aspectRatio || 1,
+    width: ensurePixelString(nodeWidth, "35%"),
+    height: ensurePixelString(nodeHeight, "auto"),
+    aspectRatio: nodeAspectRatio || null,
   });
   const [isResizing, setIsResizing] = useState(false);
   const [initialResizeComplete, setInitialResizeComplete] = useState(false);
@@ -102,17 +102,17 @@ export const CustomImageBlock: React.FC<CustomImageBlockProps> = (props) => {
     }
 
     setEditorContainer(closestEditorContainer);
-    const aspectRatio = img.naturalWidth / img.naturalHeight;
+    const aspectRatioCalculated = img.naturalWidth / img.naturalHeight;
 
-    if (width === "35%") {
+    if (nodeWidth === "35%") {
       const editorWidth = closestEditorContainer.clientWidth;
       const initialWidth = Math.max(editorWidth * 0.35, MIN_SIZE);
-      const initialHeight = initialWidth / aspectRatio;
+      const initialHeight = initialWidth / aspectRatioCalculated;
 
       const initialComputedSize = {
         width: `${Math.round(initialWidth)}px` satisfies Pixel,
         height: `${Math.round(initialHeight)}px` satisfies Pixel,
-        aspectRatio: aspectRatio,
+        aspectRatio: aspectRatioCalculated,
       };
 
       setSize(initialComputedSize);
@@ -122,9 +122,10 @@ export const CustomImageBlock: React.FC<CustomImageBlockProps> = (props) => {
       );
     } else {
       // as the aspect ratio in not stored for old images, we need to update the attrs
-      if (!aspectRatio) {
+      // or if aspectRatioCalculated from the image's width and height doesn't match stored aspectRatio then also we'll update the attrs
+      if (!nodeAspectRatio || nodeAspectRatio !== aspectRatioCalculated) {
         setSize((prevSize) => {
-          const newSize = { ...prevSize, aspectRatio };
+          const newSize = { ...prevSize, aspectRatio: aspectRatioCalculated };
           updateAttributesSafely(
             newSize,
             "Failed to update attributes while initializing images with width but no aspect ratio:"
@@ -134,16 +135,16 @@ export const CustomImageBlock: React.FC<CustomImageBlockProps> = (props) => {
       }
     }
     setInitialResizeComplete(true);
-  }, [width, updateAttributes, editorContainer, aspectRatio]);
+  }, [nodeWidth, updateAttributes, editorContainer, nodeAspectRatio]);
 
   // for real time resizing
   useLayoutEffect(() => {
     setSize((prevSize) => ({
       ...prevSize,
-      width: ensurePixelString(width),
-      height: ensurePixelString(height),
+      width: ensurePixelString(nodeWidth),
+      height: ensurePixelString(nodeHeight),
     }));
-  }, [width, height]);
+  }, [nodeWidth, nodeHeight]);
 
   const handleResize = useCallback(
     (e: MouseEvent | TouchEvent) => {
@@ -201,8 +202,10 @@ export const CustomImageBlock: React.FC<CustomImageBlockProps> = (props) => {
   // show the image loader if the remote image's src or preview image from filesystem is not set yet (while loading the image post upload) (or)
   // if the initial resize (from 35% width and "auto" height attrs to the actual size in px) is not complete
   const showImageLoader = !(remoteImageSrc || imageFromFileSystem) || !initialResizeComplete;
-  // show the image utils only if the editor is editable, the remote image's (post upload) src is set and the initial resize is complete (but not while we're showing the preview imageFromFileSystem)
-  const showImageUtils = editor.isEditable && remoteImageSrc && initialResizeComplete;
+  // show the image utils only if the remote image's (post upload) src is set and the initial resize is complete (but not while we're showing the preview imageFromFileSystem)
+  const showImageUtils = remoteImageSrc && initialResizeComplete;
+  // show the image resizer only if the editor is editable, the remote image's (post upload) src is set and the initial resize is complete (but not while we're showing the preview imageFromFileSystem)
+  const showImageResizer = editor.isEditable && remoteImageSrc && initialResizeComplete;
   // show the preview image from the file system if the remote image's src is not set
   const displayedImageSrc = remoteImageSrc ?? imageFromFileSystem;
 
@@ -213,7 +216,7 @@ export const CustomImageBlock: React.FC<CustomImageBlockProps> = (props) => {
       onMouseDown={handleImageMouseDown}
       style={{
         width: size.width,
-        aspectRatio: size.aspectRatio,
+        ...(size.aspectRatio && { aspectRatio: size.aspectRatio }),
       }}
     >
       {showImageLoader && (
@@ -239,7 +242,7 @@ export const CustomImageBlock: React.FC<CustomImageBlockProps> = (props) => {
         })}
         style={{
           width: size.width,
-          aspectRatio: size.aspectRatio,
+          ...(size.aspectRatio && { aspectRatio: size.aspectRatio }),
         }}
       />
       {showImageUtils && (
@@ -258,7 +261,7 @@ export const CustomImageBlock: React.FC<CustomImageBlockProps> = (props) => {
       {selected && displayedImageSrc === remoteImageSrc && (
         <div className="absolute inset-0 size-full bg-custom-primary-500/30" />
       )}
-      {showImageUtils && (
+      {showImageResizer && (
         <>
           <div
             className={cn(

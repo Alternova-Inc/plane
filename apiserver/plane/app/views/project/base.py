@@ -413,9 +413,20 @@ class ProjectViewSet(BaseViewSet):
                 status=status.HTTP_410_GONE,
             )
 
-    @allow_permission([ROLE.ADMIN])
     def partial_update(self, request, slug, pk=None):
         try:
+            if not ProjectMember.objects.filter(
+                member=request.user,
+                workspace__slug=slug,
+                project_id=pk,
+                role=20,
+                is_active=True,
+            ).exists():
+                return Response(
+                    {"error": "You don't have the required permissions."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+
             workspace = Workspace.objects.get(slug=slug)
 
             project = Project.objects.get(pk=pk)
@@ -495,6 +506,44 @@ class ProjectViewSet(BaseViewSet):
             return Response(
                 {"identifier": "The project identifier is already taken"},
                 status=status.HTTP_410_GONE,
+            )
+
+    def destroy(self, request, slug, pk):
+        if (
+            WorkspaceMember.objects.filter(
+                member=request.user,
+                workspace__slug=slug,
+                is_active=True,
+                role=20,
+            ).exists()
+            or ProjectMember.objects.filter(
+                member=request.user,
+                workspace__slug=slug,
+                project_id=pk,
+                role=20,
+                is_active=True,
+            ).exists()
+        ):
+            project = Project.objects.get(pk=pk)
+            project.delete()
+
+            # Delete the project members
+            DeployBoard.objects.filter(
+                project_id=pk,
+                workspace__slug=slug,
+            ).delete()
+
+            # Delete the user favorite
+            UserFavorite.objects.filter(
+                project_id=pk,
+                workspace__slug=slug,
+            ).delete()
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(
+                {"error": "You don't have the required permissions."},
+                status=status.HTTP_403_FORBIDDEN,
             )
 
 
