@@ -270,7 +270,7 @@ export const useEditor = (props: CustomEditorProps) => {
       setProviderDocument: (value) => {
         const document = provider?.document;
         if (!document) return;
-        Y.applyUpdate(document, value);
+        if (value && value.length > 0) Y.applyUpdate(document, value);
       },
     }),
     [editorRef, savedSelection]
