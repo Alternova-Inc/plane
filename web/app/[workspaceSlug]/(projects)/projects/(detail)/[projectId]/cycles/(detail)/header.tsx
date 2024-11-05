@@ -146,7 +146,6 @@ export const CycleIssuesHeader: React.FC = observer(() => {
 
   // derived values
   const cycleDetails = cycleId ? getCycleById(cycleId.toString()) : undefined;
-  const isCompletedCycle = cycleDetails?.status?.toLocaleLowerCase() === "completed";
   const canUserCreateIssue = allowPermissions(
     [EUserPermissions.ADMIN, EUserPermissions.MEMBER],
     EUserPermissionsLevel.PROJECT
@@ -289,18 +288,16 @@ export const CycleIssuesHeader: React.FC = observer(() => {
                 <Button onClick={() => setAnalyticsModal(true)} variant="neutral-primary" size="sm">
                   Analytics
                 </Button>
-                {!isCompletedCycle && (
-                  <Button
-                    className="h-full self-start"
-                    onClick={() => {
-                      setTrackElement("Cycle issues page");
-                      toggleCreateIssueModal(true, EIssuesStoreType.CYCLE);
-                    }}
-                    size="sm"
-                  >
-                    Add issue
-                  </Button>
-                )}
+                <Button
+                  className="h-full self-start"
+                  onClick={() => {
+                    setTrackElement("Cycle issues page");
+                    toggleCreateIssueModal(true, EIssuesStoreType.CYCLE);
+                  }}
+                  size="sm"
+                >
+                  Add issue
+                </Button>
               </>
             )}
             <button

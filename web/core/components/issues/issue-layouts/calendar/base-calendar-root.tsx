@@ -25,15 +25,14 @@ export type CalendarStoreType =
   | EIssuesStoreType.CYCLE
   | EIssuesStoreType.PROJECT_VIEW;
 
-interface IBaseCalendarRoot {
+  interface IBaseCalendarRoot {
   QuickActions: FC<IQuickActionProps>;
   addIssuesToView?: (issueIds: string[]) => Promise<any>;
-  isCompletedCycle?: boolean;
   viewId?: string | undefined;
 }
 
 export const BaseCalendarRoot = observer((props: IBaseCalendarRoot) => {
-  const { QuickActions, addIssuesToView, isCompletedCycle = false, viewId } = props;
+  const { QuickActions, addIssuesToView, viewId } = props;
 
   // router
   const { workspaceSlug, projectId } = useParams();
@@ -145,7 +144,7 @@ export const BaseCalendarRoot = observer((props: IBaseCalendarRoot) => {
               handleRemoveFromView={async () => removeIssueFromView && removeIssueFromView(issue.project_id, issue.id)}
               handleArchive={async () => archiveIssue && archiveIssue(issue.project_id, issue.id)}
               handleRestore={async () => restoreIssue && restoreIssue(issue.project_id, issue.id)}
-              readOnly={!isEditingAllowed || isCompletedCycle}
+              readOnly={!isEditingAllowed}
               placements={placement}
             />
           )}
@@ -154,7 +153,7 @@ export const BaseCalendarRoot = observer((props: IBaseCalendarRoot) => {
           getGroupIssueCount={getGroupIssueCount}
           addIssuesToView={addIssuesToView}
           quickAddCallback={quickAddIssue}
-          readOnly={!isEditingAllowed || isCompletedCycle}
+          readOnly={!isEditingAllowed}
           updateFilters={updateFilters}
           handleDragAndDrop={handleDragAndDrop}
         />
