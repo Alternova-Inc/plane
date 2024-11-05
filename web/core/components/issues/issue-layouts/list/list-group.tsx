@@ -57,7 +57,6 @@ interface Props {
   handleOnDrop: (source: GroupDropLocation, destination: GroupDropLocation) => Promise<void>;
   disableIssueCreation?: boolean;
   addIssuesToView?: (issueIds: string[]) => Promise<TIssue>;
-  isCompletedCycle?: boolean;
   showEmptyGroup?: boolean;
   loadMoreIssues: (groupId?: string) => void;
   selectionHelpers: TSelectionHelper;
@@ -83,7 +82,6 @@ export const ListGroup = observer((props: Props) => {
     handleOnDrop,
     disableIssueCreation,
     addIssuesToView,
-    isCompletedCycle,
     showEmptyGroup,
     loadMoreIssues,
     selectionHelpers,
@@ -129,7 +127,7 @@ export const ListGroup = observer((props: Props) => {
     </div>
   );
 
-  const validateEmptyIssueGroups = (issueCount: number = 0) => {
+  const validateEmptyIssueGroups = (issueCount = 0) => {
     if (!showEmptyGroup && issueCount <= 0) return false;
     return true;
   };
@@ -250,7 +248,7 @@ export const ListGroup = observer((props: Props) => {
           count={groupIssueCount}
           issuePayload={group.payload}
           canEditProperties={canEditProperties}
-          disableIssueCreation={disableIssueCreation || isGroupByCreatedBy || isCompletedCycle}
+          disableIssueCreation={disableIssueCreation || isGroupByCreatedBy}
           addIssuesToView={addIssuesToView}
           selectionHelpers={selectionHelpers}
           handleCollapsedGroups={handleCollapsedGroups}
@@ -284,7 +282,7 @@ export const ListGroup = observer((props: Props) => {
 
           {shouldLoadMore && (group_by ? <>{loadMore}</> : <ListLoaderItemRow ref={setIntersectionElement} />)}
 
-          {enableIssueQuickAdd && !disableIssueCreation && !isGroupByCreatedBy && !isCompletedCycle && (
+          {enableIssueQuickAdd && !disableIssueCreation && !isGroupByCreatedBy && (
             <div className="sticky bottom-0 z-[1] w-full flex-shrink-0">
               <QuickAddIssueRoot
                 layout={EIssueLayoutTypes.LIST}

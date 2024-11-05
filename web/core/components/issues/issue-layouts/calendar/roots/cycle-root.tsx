@@ -4,22 +4,18 @@ import { useParams } from "next/navigation";
 //hooks
 import { CycleIssueQuickActions } from "@/components/issues";
 import { EIssuesStoreType } from "@/constants/issue";
-import { useCycle, useIssues } from "@/hooks/store";
+import { useIssues } from "@/hooks/store";
 // components
 import { BaseCalendarRoot } from "../base-calendar-root";
 // types
 // constants
 
 export const CycleCalendarLayout: React.FC = observer(() => {
-  const { currentProjectCompletedCycleIds } = useCycle();
   const { workspaceSlug, projectId, cycleId } = useParams();
 
   const { issues } = useIssues(EIssuesStoreType.CYCLE);
 
   if (!cycleId) return null;
-
-  const isCompletedCycle =
-    cycleId && currentProjectCompletedCycleIds ? currentProjectCompletedCycleIds.includes(cycleId.toString()) : false;
 
   const addIssuesToView = useCallback(
     (issueIds: string[]) => {
@@ -33,7 +29,6 @@ export const CycleCalendarLayout: React.FC = observer(() => {
     <BaseCalendarRoot
       QuickActions={CycleIssueQuickActions}
       addIssuesToView={addIssuesToView}
-      isCompletedCycle={isCompletedCycle}
       viewId={cycleId?.toString()}
     />
   );

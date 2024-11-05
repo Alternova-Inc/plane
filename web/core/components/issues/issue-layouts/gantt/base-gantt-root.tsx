@@ -25,7 +25,6 @@ import { IssueLayoutHOC } from "../issue-layout-HOC";
 
 interface IBaseGanttRoot {
   viewId?: string | undefined;
-  isCompletedCycle?: boolean;
 }
 
 export type GanttStoreType =
@@ -35,7 +34,7 @@ export type GanttStoreType =
   | EIssuesStoreType.PROJECT_VIEW;
 
 export const BaseGanttRoot: React.FC<IBaseGanttRoot> = observer((props: IBaseGanttRoot) => {
-  const { viewId, isCompletedCycle = false } = props;
+  const { viewId } = props;
   // router
   const { workspaceSlug } = useParams();
 
@@ -92,7 +91,7 @@ export const BaseGanttRoot: React.FC<IBaseGanttRoot> = observer((props: IBaseGan
   const isAllowed = allowPermissions([EUserPermissions.ADMIN, EUserPermissions.MEMBER], EUserPermissionsLevel.PROJECT);
 
   const quickAdd =
-    enableIssueCreation && isAllowed && !isCompletedCycle ? (
+    enableIssueCreation && isAllowed  ? (
       <QuickAddIssueRoot
         layout={EIssueLayoutTypes.GANTT}
         QuickAddButton={GanttQuickAddIssueButton}

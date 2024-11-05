@@ -28,12 +28,11 @@ export type SpreadsheetStoreType =
 interface IBaseSpreadsheetRoot {
   QuickActions: FC<IQuickActionProps>;
   canEditPropertiesBasedOnProject?: (projectId: string) => boolean;
-  isCompletedCycle?: boolean;
   viewId?: string | undefined;
 }
 
 export const BaseSpreadsheetRoot = observer((props: IBaseSpreadsheetRoot) => {
-  const { QuickActions, canEditPropertiesBasedOnProject, isCompletedCycle = false, viewId } = props;
+  const { QuickActions, canEditPropertiesBasedOnProject = false, viewId } = props;
   // router
   const { projectId } = useParams();
   // store hooks
@@ -99,11 +98,11 @@ export const BaseSpreadsheetRoot = observer((props: IBaseSpreadsheetRoot) => {
         handleArchive={async () => archiveIssue && archiveIssue(issue.project_id, issue.id)}
         handleRestore={async () => restoreIssue && restoreIssue(issue.project_id, issue.id)}
         portalElement={portalElement}
-        readOnly={!isEditingAllowed || isCompletedCycle}
+        readOnly={!isEditingAllowed}
         placements={placement}
       />
     ),
-    [isEditingAllowed, isCompletedCycle, removeIssue, updateIssue, removeIssueFromView, archiveIssue, restoreIssue]
+    [isEditingAllowed, removeIssue, updateIssue, removeIssueFromView, archiveIssue, restoreIssue]
   );
 
   if (!Array.isArray(issueIds)) return null;
@@ -120,7 +119,7 @@ export const BaseSpreadsheetRoot = observer((props: IBaseSpreadsheetRoot) => {
         canEditProperties={canEditProperties}
         quickAddCallback={quickAddIssue}
         enableQuickCreateIssue={enableQuickAdd}
-        disableIssueCreation={!enableIssueCreation || !isEditingAllowed || isCompletedCycle}
+        disableIssueCreation={!enableIssueCreation || !isEditingAllowed}
         canLoadMoreIssues={!!nextPageResults}
         loadMoreIssues={fetchNextIssues}
       />
