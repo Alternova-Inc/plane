@@ -6,7 +6,7 @@ import { CycleIssueQuickActions } from "@/components/issues";
 // constants
 import { EIssuesStoreType } from "@/constants/issue";
 // hooks
-import { useCycle, useIssues, useUserPermissions } from "@/hooks/store";
+import { useIssues, useUserPermissions } from "@/hooks/store";
 import { EUserPermissions, EUserPermissionsLevel } from "@/plane-web/constants/user-permissions";
 // components
 import { BaseKanBanRoot } from "../base-kanban-root";
@@ -16,19 +16,17 @@ export const CycleKanBanLayout: React.FC = observer(() => {
 
   // store
   const { issues } = useIssues(EIssuesStoreType.CYCLE);
-  const { currentProjectCompletedCycleIds } = useCycle();
   const { allowPermissions } = useUserPermissions();
 
-  const isCompletedCycle =
-    cycleId && currentProjectCompletedCycleIds ? currentProjectCompletedCycleIds.includes(cycleId.toString()) : false;
+
   const isEditingAllowed = allowPermissions(
     [EUserPermissions.ADMIN, EUserPermissions.MEMBER],
     EUserPermissionsLevel.PROJECT
   );
 
   const canEditIssueProperties = useCallback(
-    () => !isCompletedCycle && isEditingAllowed,
-    [isCompletedCycle, isEditingAllowed]
+    () =>  isEditingAllowed,
+    [isEditingAllowed]
   );
 
   const addIssuesToView = useCallback(
@@ -44,7 +42,6 @@ export const CycleKanBanLayout: React.FC = observer(() => {
       QuickActions={CycleIssueQuickActions}
       addIssuesToView={addIssuesToView}
       canEditPropertiesBasedOnProject={canEditIssueProperties}
-      isCompletedCycle={isCompletedCycle}
       viewId={cycleId?.toString()}
     />
   );

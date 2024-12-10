@@ -6,7 +6,7 @@ import { CycleIssueQuickActions } from "@/components/issues";
 // constants
 import { EIssuesStoreType } from "@/constants/issue";
 // hooks
-import { useCycle, useIssues, useUserPermissions } from "@/hooks/store";
+import { useIssues, useUserPermissions } from "@/hooks/store";
 import { EUserPermissions, EUserPermissionsLevel } from "@/plane-web/constants/user-permissions";
 // types
 import { BaseListRoot } from "../base-list-root";
@@ -15,19 +15,17 @@ export const CycleListLayout: React.FC = observer(() => {
   const { workspaceSlug, projectId, cycleId } = useParams();
   // store
   const { issues } = useIssues(EIssuesStoreType.CYCLE);
-  const { currentProjectCompletedCycleIds } = useCycle(); // mobx store
   const { allowPermissions } = useUserPermissions();
 
-  const isCompletedCycle =
-    cycleId && currentProjectCompletedCycleIds ? currentProjectCompletedCycleIds.includes(cycleId.toString()) : false;
+
   const isEditingAllowed = allowPermissions(
     [EUserPermissions.ADMIN, EUserPermissions.MEMBER],
     EUserPermissionsLevel.PROJECT
   );
 
   const canEditIssueProperties = useCallback(
-    () => !isCompletedCycle && isEditingAllowed,
-    [isCompletedCycle, isEditingAllowed]
+    () => isEditingAllowed,
+    [isEditingAllowed]
   );
 
   const addIssuesToView = useCallback(
@@ -43,7 +41,6 @@ export const CycleListLayout: React.FC = observer(() => {
       QuickActions={CycleIssueQuickActions}
       addIssuesToView={addIssuesToView}
       canEditPropertiesBasedOnProject={canEditIssueProperties}
-      isCompletedCycle={isCompletedCycle}
       viewId={cycleId?.toString()}
     />
   );

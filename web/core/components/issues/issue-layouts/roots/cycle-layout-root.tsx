@@ -25,7 +25,6 @@ import { IssuesStoreContext } from "@/hooks/use-issue-layout-store";
 const CycleIssueLayout = (props: {
   activeLayout: EIssueLayoutTypes | undefined;
   cycleId: string;
-  isCompletedCycle: boolean;
 }) => {
   switch (props.activeLayout) {
     case EIssueLayoutTypes.LIST:
@@ -35,7 +34,7 @@ const CycleIssueLayout = (props: {
     case EIssueLayoutTypes.CALENDAR:
       return <CycleCalendarLayout />;
     case EIssueLayoutTypes.GANTT:
-      return <BaseGanttRoot viewId={props.cycleId} isCompletedCycle={props.isCompletedCycle} />;
+      return <BaseGanttRoot viewId={props.cycleId} />;
     case EIssueLayoutTypes.SPREADSHEET:
       return <CycleSpreadsheetLayout />;
     default:
@@ -68,7 +67,6 @@ export const CycleLayoutRoot: React.FC = observer(() => {
 
   const cycleDetails = cycleId ? getCycleById(cycleId.toString()) : undefined;
   const cycleStatus = cycleDetails?.status?.toLocaleLowerCase() ?? "draft";
-  const isCompletedCycle = cycleStatus === "completed";
   const isProgressSnapshotEmpty = isEmpty(cycleDetails?.progress_snapshot);
   const transferableIssuesCount = cycleDetails
     ? cycleDetails.backlog_issues + cycleDetails.unstarted_issues + cycleDetails.started_issues
@@ -101,7 +99,6 @@ export const CycleLayoutRoot: React.FC = observer(() => {
           <CycleIssueLayout
             activeLayout={activeLayout}
             cycleId={cycleId?.toString()}
-            isCompletedCycle={isCompletedCycle}
           />
         </div>
         {/* peek overview */}

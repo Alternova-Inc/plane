@@ -2,7 +2,7 @@ import React, { useCallback } from "react";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
 // hooks
-import { useCycle, useUserPermissions } from "@/hooks/store";
+import { useUserPermissions } from "@/hooks/store";
 import { EUserPermissions, EUserPermissionsLevel } from "@/plane-web/constants/user-permissions";
 // components
 import { CycleIssueQuickActions } from "../../quick-action-dropdowns";
@@ -12,19 +12,17 @@ export const CycleSpreadsheetLayout: React.FC = observer(() => {
   // router
   const { cycleId } = useParams();
   // store hooks
-  const { currentProjectCompletedCycleIds } = useCycle();
   const { allowPermissions } = useUserPermissions();
   // auth
-  const isCompletedCycle =
-    cycleId && currentProjectCompletedCycleIds ? currentProjectCompletedCycleIds.includes(cycleId.toString()) : false;
+
   const isEditingAllowed = allowPermissions(
     [EUserPermissions.ADMIN, EUserPermissions.MEMBER],
     EUserPermissionsLevel.PROJECT
   );
 
   const canEditIssueProperties = useCallback(
-    () => !isCompletedCycle && isEditingAllowed,
-    [isCompletedCycle, isEditingAllowed]
+    () =>  isEditingAllowed,
+    [isEditingAllowed]
   );
 
   if (!cycleId) return null;
@@ -33,7 +31,6 @@ export const CycleSpreadsheetLayout: React.FC = observer(() => {
     <BaseSpreadsheetRoot
       QuickActions={CycleIssueQuickActions}
       canEditPropertiesBasedOnProject={canEditIssueProperties}
-      isCompletedCycle={isCompletedCycle}
       viewId={cycleId.toString()}
     />
   );

@@ -297,7 +297,7 @@ export const useEditor = (props: CustomEditorProps) => {
       setProviderDocument: (value) => {
         const document = provider?.document;
         if (!document) return;
-        Y.applyUpdate(document, value);
+        if (value?.length) Y.applyUpdate(document, value);
       },
       emitRealTimeUpdate: (message: TDocumentEventsServer) => provider?.sendStateless(message),
       listenToRealTimeUpdate: () => provider && { on: provider.on.bind(provider), off: provider.off.bind(provider) },

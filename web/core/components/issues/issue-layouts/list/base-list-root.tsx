@@ -32,10 +32,9 @@ interface IBaseListRoot {
   addIssuesToView?: (issueIds: string[]) => Promise<any>;
   canEditPropertiesBasedOnProject?: (projectId: string) => boolean;
   viewId?: string | undefined;
-  isCompletedCycle?: boolean;
 }
 export const BaseListRoot = observer((props: IBaseListRoot) => {
-  const { QuickActions, viewId, addIssuesToView, canEditPropertiesBasedOnProject, isCompletedCycle = false } = props;
+  const { QuickActions, viewId, addIssuesToView, canEditPropertiesBasedOnProject } = props;
   // router
   const storeType = useIssueStoreType() as ListStoreType;
   //stores
@@ -100,11 +99,11 @@ export const BaseListRoot = observer((props: IBaseListRoot) => {
         handleRemoveFromView={async () => removeIssueFromView && removeIssueFromView(issue.project_id, issue.id)}
         handleArchive={async () => archiveIssue && archiveIssue(issue.project_id, issue.id)}
         handleRestore={async () => restoreIssue && restoreIssue(issue.project_id, issue.id)}
-        readOnly={!isEditingAllowed || isCompletedCycle}
+        readOnly={!isEditingAllowed}
       />
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isEditingAllowed, isCompletedCycle, removeIssue, updateIssue, removeIssueFromView, archiveIssue, restoreIssue]
+    [isEditingAllowed, removeIssue, updateIssue, removeIssueFromView, archiveIssue, restoreIssue]
   );
 
   const loadMoreIssues = useCallback(
@@ -150,7 +149,6 @@ export const BaseListRoot = observer((props: IBaseListRoot) => {
           canEditProperties={canEditProperties}
           disableIssueCreation={!enableIssueCreation || !isEditingAllowed}
           addIssuesToView={addIssuesToView}
-          isCompletedCycle={isCompletedCycle}
           handleOnDrop={handleOnDrop}
           handleCollapsedGroups={handleCollapsedGroups}
           collapsedGroups={collapsedGroups}

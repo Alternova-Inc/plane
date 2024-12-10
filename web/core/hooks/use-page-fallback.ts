@@ -1,4 +1,7 @@
+import { Buffer } from 'buffer';
+
 import { useCallback, useEffect } from "react";
+
 // plane editor
 import { EditorRefApi } from "@plane/editor";
 // plane types

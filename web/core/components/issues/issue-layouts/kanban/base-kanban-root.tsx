@@ -37,12 +37,11 @@ export interface IBaseKanBanLayout {
   QuickActions: FC<IQuickActionProps>;
   addIssuesToView?: (issueIds: string[]) => Promise<any>;
   canEditPropertiesBasedOnProject?: (projectId: string) => boolean;
-  isCompletedCycle?: boolean;
   viewId?: string | undefined;
 }
 
 export const BaseKanBanRoot: React.FC<IBaseKanBanLayout> = observer((props: IBaseKanBanLayout) => {
-  const { QuickActions, addIssuesToView, canEditPropertiesBasedOnProject, isCompletedCycle = false, viewId } = props;
+  const { QuickActions, addIssuesToView, canEditPropertiesBasedOnProject, viewId } = props;
   // router
   const { workspaceSlug, projectId } = useParams();
   const pathname = usePathname();
@@ -176,11 +175,11 @@ export const BaseKanBanRoot: React.FC<IBaseKanBanLayout> = observer((props: IBas
         handleRemoveFromView={async () => removeIssueFromView && removeIssueFromView(issue.project_id, issue.id)}
         handleArchive={async () => archiveIssue && archiveIssue(issue.project_id, issue.id)}
         handleRestore={async () => restoreIssue && restoreIssue(issue.project_id, issue.id)}
-        readOnly={!isEditingAllowed || isCompletedCycle}
+        readOnly={!isEditingAllowed}
       />
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isEditingAllowed, isCompletedCycle, removeIssue, updateIssue, removeIssueFromView, archiveIssue, restoreIssue]
+    [isEditingAllowed, removeIssue, updateIssue, removeIssueFromView, archiveIssue, restoreIssue]
   );
 
   const handleDeleteIssue = async () => {
@@ -266,7 +265,7 @@ export const BaseKanBanRoot: React.FC<IBaseKanBanLayout> = observer((props: IBas
               enableQuickIssueCreate={enableQuickAdd}
               showEmptyGroup={userDisplayFilters?.show_empty_groups ?? true}
               quickAddCallback={quickAddIssue}
-              disableIssueCreation={!enableIssueCreation || !isEditingAllowed || isCompletedCycle}
+              disableIssueCreation={!enableIssueCreation || !isEditingAllowed }
               canEditProperties={canEditProperties}
               addIssuesToView={addIssuesToView}
               scrollableContainerRef={scrollableContainerRef}
