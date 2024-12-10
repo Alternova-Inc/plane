@@ -18,11 +18,7 @@ class UserSerializer(BaseSerializer):
     class Meta:
         model = User
         # Exclude password field from the serializer
-        fields = [
-            field.name
-            for field in User._meta.fields
-            if field.name != "password"
-        ]
+        fields = [field.name for field in User._meta.fields if field.name != "password"]
         # Make all system fields and email read only
         read_only_fields = [
             "id",
@@ -63,6 +59,8 @@ class UserMeSerializer(BaseSerializer):
             "id",
             "avatar",
             "cover_image",
+            "avatar_url",
+            "cover_image_url",
             "date_joined",
             "display_name",
             "email",
@@ -91,11 +89,7 @@ class UserMeSettingsSerializer(BaseSerializer):
 
     class Meta:
         model = User
-        fields = [
-            "id",
-            "email",
-            "workspace",
-        ]
+        fields = ["id", "email", "workspace"]
         read_only_fields = fields
 
     def get_workspace(self, obj):
@@ -132,8 +126,7 @@ class UserMeSettingsSerializer(BaseSerializer):
         else:
             fallback_workspace = (
                 Workspace.objects.filter(
-                    workspace_member__member_id=obj.id,
-                    workspace_member__is_active=True,
+                    workspace_member__member_id=obj.id, workspace_member__is_active=True
                 )
                 .order_by("created_at")
                 .first()
@@ -142,14 +135,10 @@ class UserMeSettingsSerializer(BaseSerializer):
                 "last_workspace_id": None,
                 "last_workspace_slug": None,
                 "fallback_workspace_id": (
-                    fallback_workspace.id
-                    if fallback_workspace is not None
-                    else None
+                    fallback_workspace.id if fallback_workspace is not None else None
                 ),
                 "fallback_workspace_slug": (
-                    fallback_workspace.slug
-                    if fallback_workspace is not None
-                    else None
+                    fallback_workspace.slug if fallback_workspace is not None else None
                 ),
                 "invites": workspace_invites,
             }
@@ -163,13 +152,11 @@ class UserLiteSerializer(BaseSerializer):
             "first_name",
             "last_name",
             "avatar",
+            "avatar_url",
             "is_bot",
             "display_name",
         ]
-        read_only_fields = [
-            "id",
-            "is_bot",
-        ]
+        read_only_fields = ["id", "is_bot"]
 
 
 class UserAdminLiteSerializer(BaseSerializer):
@@ -180,15 +167,13 @@ class UserAdminLiteSerializer(BaseSerializer):
             "first_name",
             "last_name",
             "avatar",
+            "avatar_url",
             "is_bot",
             "display_name",
             "email",
             "last_login_medium",
         ]
-        read_only_fields = [
-            "id",
-            "is_bot",
-        ]
+        read_only_fields = ["id", "is_bot"]
 
 
 class ChangePasswordSerializer(serializers.Serializer):
@@ -209,9 +194,7 @@ class ChangePasswordSerializer(serializers.Serializer):
 
         if data.get("new_password") != data.get("confirm_password"):
             raise serializers.ValidationError(
-                {
-                    "error": "Confirm password should be same as the new password."
-                }
+                {"error": "Confirm password should be same as the new password."}
             )
 
         return data
@@ -229,15 +212,11 @@ class ProfileSerializer(BaseSerializer):
     class Meta:
         model = Profile
         fields = "__all__"
-        read_only_fields = [
-            "user",
-        ]
+        read_only_fields = ["user"]
 
 
 class AccountSerializer(BaseSerializer):
     class Meta:
         model = Account
         fields = "__all__"
-        read_only_fields = [
-            "user",
-        ]
+        read_only_fields = ["user"]

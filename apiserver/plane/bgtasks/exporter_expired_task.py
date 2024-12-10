@@ -18,8 +18,7 @@ from plane.utils.s3 import S3
 def delete_old_s3_link():
     # Get a list of keys and IDs to process
     expired_exporter_history = ExporterHistory.objects.filter(
-        Q(url__isnull=False)
-        & Q(created_at__lte=timezone.now() - timedelta(days=8))
+        Q(url__isnull=False) & Q(created_at__lte=timezone.now() - timedelta(days=8))
     ).values_list("key", "id")
     s3 = S3()
 
