@@ -2,7 +2,14 @@
 from rest_framework import serializers
 
 # Module import
-from plane.db.models import Account, Profile, User, Workspace, WorkspaceMemberInvite
+from plane.utils.s3 import refresh_avatar_image
+from plane.db.models import (
+    Account,
+    Profile,
+    User,
+    Workspace,
+    WorkspaceMemberInvite,
+)
 
 from .base import BaseSerializer
 
@@ -69,6 +76,12 @@ class UserMeSerializer(BaseSerializer):
             "last_login_medium",
         ]
         read_only_fields = fields
+
+    def to_representation(self, instance):
+        if instance.avatar:
+            refresh_avatar_image(instance)
+
+        return super().to_representation(instance)
 
 
 class UserMeSettingsSerializer(BaseSerializer):
